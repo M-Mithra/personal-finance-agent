@@ -1,0 +1,65 @@
+transaction_id,date,description,merchant,amount,direction,category,currency
+T202508-001,2025-08-01,Monthly apartment rent,Metro Apartments,1450.00,expense,Housing,USD
+T202508-020,2025-08-01,Monthly transit pass,City Transit,45.00,expense,Transport,USD
+T202508-002,2025-08-02,Monthly salary deposit,Acme Corp,5200.00,income,Salary,USD
+T202508-003,2025-08-03,Electricity bill,City Power,88.50,expense,Utilities,USD
+T202508-004,2025-08-03,Water and sewer bill,Water & Sewer,41.20,expense,Utilities,USD
+T202508-005,2025-08-04,Internet service,Broadband Co,64.99,expense,Utilities,USD
+T202508-006,2025-08-05,Video streaming subscription,StreamPlus,15.99,expense,Subscriptions,USD
+T202508-007,2025-08-05,Cloud storage subscription,CloudVault,9.99,expense,Subscriptions,USD
+T202508-008,2025-08-06,Gym membership,FitLife Gym,39.00,expense,Health,USD
+T202508-009,2025-08-06,Weekly grocery shopping,FreshMart,49.43,expense,Groceries,USD
+T202508-013,2025-08-07,Corner store groceries,GreenGrocer,24.27,expense,Groceries,USD
+T202508-016,2025-08-08,Coffee and pastry,Cafe Luna,5.82,expense,Dining,USD
+T202508-017,2025-08-09,Lunch,Pizzeria Roma,12.90,expense,Dining,USD
+T202508-021,2025-08-11,Fuel fill-up,Corner Gas,48.23,expense,Transport,USD
+T202508-026,2025-08-12,Pharmacy,Wellness Pharmacy,39.84,expense,Health,USD
+T202508-010,2025-08-13,Weekly grocery shopping,FreshMart,84.36,expense,Groceries,USD
+T202508-014,2025-08-14,Corner store groceries,GreenGrocer,16.07,expense,Groceries,USD
+T202508-027,2025-08-15,Movie tickets,Cinema 7,14.93,expense,Entertainment,USD
+T202508-018,2025-08-16,Dinner,Sushi House,60.95,expense,Dining,USD
+T202508-028,2025-08-17,Clothing,Mall Outlet,83.92,expense,Shopping,USD
+T202508-022,2025-08-18,Fuel fill-up,Corner Gas,46.80,expense,Transport,USD
+T202508-030,2025-08-18,Round-trip flight,Skyline Air,425.00,expense,Travel,USD
+T202508-031,2025-08-19,Hotel stay,Harbor Grand Hotel,382.40,expense,Travel,USD
+T202508-011,2025-08-20,Weekly grocery shopping,FreshMart,58.60,expense,Groceries,USD
+T202508-015,2025-08-21,Corner store groceries,GreenGrocer,22.76,expense,Groceries,USD
+T202508-024,2025-08-22,Ride share,RideShare Co,28.30,expense,Transport,USD
+T202508-029,2025-08-23,Books,Books & Co,22.58,expense,Shopping,USD
+T202508-019,2025-08-24,Fast food,Burger Joint,18.81,expense,Dining,USD
+T202508-032,2025-08-25,Concert tickets,Riverview Concert Hall,120.00,expense,Entertainment,USD
+T202508-012,2025-08-27,Weekly grocery shopping,FreshMart,74.81,expense,Groceries,USD
+T202508-023,2025-08-28,Fuel fill-up,Corner Gas,55.22,expense,Transport,USD
+T202508-025,2025-08-29,Parking,Parking Garage,9.00,expense,Transport,USD
+T202509-033,2025-09-01,Monthly apartment rent,Metro Apartments,1450.00,expense,Housing,USD
+T202509-052,2025-09-01,Monthly transit pass,City Transit,45.00,expense,Transport,USD
+T202509-034,2025-09-02,Monthly salary deposit,Acme Corp,5200.00,income,Salary,USD
+T202509-035,2025-09-03,Electricity bill,City Power,88.50,expense,Utilities,USD
+T202509-036,2025-09-03,Water and sewer bill,Water & Sewer,41.20,expense,Utilities,USD
+T202509-037,2025-09-04,Internet service,Broadband Co,64.99,expense,Utilities,USD
+T202509-038,2025-09-05,Video streaming subscription,StreamPlus,15.99,expense,Subscriptions,USD
+T202509-039,2025-09-05,Cloud storage subscription,CloudVault,9.99,expense,Subscriptions,USD
+T202509-040,2025-09-06,Gym membership,FitLife Gym,39.00,expense,Health,USD
+T202509-041,2025-09-06,Weekly grocery shopping,FreshMart,82.63,expense,Groceries,USD
+T202509-045,2025-09-07,Corner store groceries,GreenGrocer,24.95,expense,Groceries,USD
+T202509-048,2025-09-08,Coffee and pastry,Cafe Luna,5.35,expense,Dining,USD
+T202509-049,2025-09-09,Lunch,Pizzeria Roma,14.59,expense,Dining,USD
+T202509-053,2025-09-11,Fuel fill-up,Corner Gas,43.91,expense,Transport,USD
+T202509-058,2025-09-12,Pharmacy,Wellness Pharmacy,34.33,expense,Health,USD
+T202509-042,2025-09-13,Weekly grocery shopping,FreshMart,66.76,expense,Groceries,USD
+T202509-046,2025-09-14,Corner store groceries,GreenGrocer,24.82,expense,Groceries,USD
+T202509-059,2025-09-15,Movie tickets,Cinema 7,14.55,expense,Entertainment,USD
+T202509-050,2025-09-16,Dinner,Sushi House,40.69,expense,Dining,USD
+T202509-060,2025-09-17,Clothing,Mall Outlet,81.70,expense,Shopping,USD
+T202509-054,2025-09-18,Fuel fill-up,Corner Gas,53.47,expense,Transport,USD
+T202509-043,2025-09-20,Weekly grocery shopping,FreshMart,67.98,expense,Groceries,USD
+T202509-062,2025-09-20,Laptop purchase,TechMall Online,649.00,expense,Shopping,USD
+T202509-047,2025-09-21,Corner store groceries,GreenGrocer,12.89,expense,Groceries,USD
+T202509-056,2025-09-22,Ride share,RideShare Co,19.78,expense,Transport,USD
+T202509-063,2025-09-22,Refund for returned item,TechMall Online,49.00,refund,Shopping,USD
+T202509-061,2025-09-23,Books,Books & Co,24.63,expense,Shopping,USD
+T202509-051,2025-09-24,Fast food,Burger Joint,17.33,expense,Dining,USD
+T202509-064,2025-09-25,Transfer to savings,Savings Account,200.00,transfer,Savings,USD
+T202509-044,2025-09-27,Weekly grocery shopping,FreshMart,77.11,expense,Groceries,USD
+T202509-055,2025-09-28,Fuel fill-up,Corner Gas,42.06,expense,Transport,USD
+T202509-057,2025-09-29,Parking,Parking Garage,9.00,expense,Transport,USD
