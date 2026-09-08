@@ -257,6 +257,18 @@ Each decision record should contain:
 - **Consequences:** The LLM proposes, the runtime validates/executes/verifies. Full model-powered execution is the next slice and is not implemented here.
 - **Related Documentation:** `docs/10_llm_integration_design.md` (sections 7, 16), `docs/06_implementation.md` (sections 4, 5, Slice 5)
 
+### DEC-020 - Local LLM Experiment: Ollama + Qwen3 4B
+
+- **Date:** 2026-08-09
+- **Area:** Agent / LLM / Local Inference
+- **Status:** EXPERIMENTAL — not a permanent commitment
+- **Decision:** Investigate Ollama running Qwen3 4B locally as the first experimental LLM backend for the Personal Finance Agent. This is explicitly an experiment: neither Ollama nor Qwen3 4B is a permanent architectural commitment. The provider-neutral ``LLMClient`` remains the boundary; Ollama/Qwen3 is one implementation behind that boundary. No Ollama SDK, model download, API call, or inference code is introduced in this documentation phase.
+- **Context / Problem:** Before committing to a paid hosted API, the project wants to evaluate local inference for cost-free experimentation, privacy/data-locality, unrestricted iteration, and learning. Qwen3 4B is small enough to investigate on the target hardware (Apple Silicon M2, 8 GB unified memory) while still offering modern reasoning/instruction-following capabilities. Tool-calling and structured-output suitability must be evaluated empirically; model quality and resource usage are TBD until measured.
+- **Alternatives Considered:** Hosted frontier API (deferred — introduces cost and external data transmission); larger local model (riskier on 8 GB hardware — consider after initial feasibility is established); smaller local model (less reasoning capacity); different local runtime (Ollama chosen initially for workflow simplicity).
+- **Rationale:** Local inference lets us learn agent engineering against a real model without API costs or rate limits. Qwen3 4B is a reasonable first feasibility probe. The ``LLMClient`` boundary protects the agent from provider/runtime lock-in, so a failed experiment does not invalidate the architecture (DEC-015, DEC-019).
+- **Consequences:** The experiment may conclude that Qwen3 4B is adequate, that a different local model/runtime is needed, or that a hosted model is materially better. The agent runtime, tools, and verification architecture remain unchanged regardless of the outcome. All evaluation cases, success criteria, and failure criteria are defined in `docs/11_local_llm_integration.md` before implementation begins.
+- **Related Documentation:** `docs/10_llm_integration_design.md` (sections 16–26), `docs/11_local_llm_integration.md` (all sections)
+
 ## 5. Decisions by Engineering Area
 
 | Area | Current Status |
@@ -270,6 +282,7 @@ Each decision record should contain:
 | Analytical Tools | First five deterministic capabilities implemented within the established boundaries |
 | Agent Runtime | Deterministic runtime scaffold implemented (lifecycle, state, understanding, planning, tools, replanning, response) |
 | LLM Abstraction | Provider-neutral interface and FakeLLMClient implemented; no provider selected |
+| Local Inference | EXPERIMENTAL — Ollama + Qwen3 4B proposed as first experiment; not yet implemented |
 | LLM / Model Selection | OPEN/TBD |
 | Memory | OPEN/TBD; persistent memory not required initially |
 | RAG | OPEN/TBD; not required initially unless justified |
@@ -298,6 +311,7 @@ No superseded decisions yet.
 | 2026-08-09 | Deterministic foundation slice implemented: canonical transaction model, CSV loading and validation, normalization, five analytical capabilities, deterministic verification, synthetic dataset, and 84 unit tests. | Provide verified deterministic capabilities before any agent development. | DEC-011 through DEC-014 |
 | 2026-08-09 | Deterministic agent runtime implemented: explicit lifecycle state (`runtime/state.py`), deterministic understanding (`runtime/understanding.py`), planning (`runtime/planning.py`), tool/action interface (`runtime/tools.py`), verification wiring (`runtime/checks.py`), bounded replanning (`runtime/replanning.py`), grounded response generation (`runtime/response.py`), and the runtime loop (`runtime/agent.py`). | Establish the agent lifecycle, interfaces, and state representation before any LLM is introduced. | DEC-015 through DEC-018 |
 | 2026-08-09 | Provider-neutral LLM abstraction implemented: `llm/client.py` (`LLMClient` interface and response validation), `llm/types.py` (structured response types), `llm/tool_definitions.py` (model-facing tool metadata), `llm/errors.py` (typed failure vocabulary), `llm/fake.py` (deterministic `FakeLLMClient`), and an injectable `llm_client` boundary on `run()` and `Agent`. | Establish the LLM boundary before any provider selection, keeping the deterministic runtime authoritative and unchanged. | DEC-019 |
+| 2026-08-09 | Local LLM experiment designed: Ollama + Qwen3 4B proposed as the first experimental backend; documented in `docs/11_local_llm_integration.md`. No runtime, SDK, model download, or inference code introduced. | Evaluate local inference before committing to a paid hosted API; preserve the provider-neutral `LLMClient` boundary. | DEC-020 |
 
 ## 8. Future Decision Areas
 
