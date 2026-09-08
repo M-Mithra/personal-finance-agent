@@ -6,13 +6,19 @@ replan, and respond. Every stage records a trajectory entry and updates the
 explicit :class:`AgentState`, which is returned fully populated so the entire
 execution can be inspected.
 
-The runtime uses only the deterministic modules in this package plus the
-analytical foundation. No LLM, framework, or external service is involved.
+By default the runtime uses only the deterministic modules in this package plus
+the analytical foundation. An optional provider-neutral ``llm_client`` may be
+injected (see ``docs/10_llm_integration_design.md``); in this phase the
+injectable client is only recorded for observability and does not alter the
+deterministic lifecycle, which remains the baseline until the first
+model-powered slice is implemented. No LLM framework or external service is
+required.
 """
 
 from __future__ import annotations
 
 from collections.abc import Sequence
+from typing import TYPE_CHECKING
 
 from ..models import Transaction
 from .checks import TRUST_FAILED, TRUST_INCONCLUSIVE, classify_trust, verify_for
@@ -31,6 +37,9 @@ from .state import (
 )
 from .tools import ToolError, execute_tool
 from .understanding import understand
+
+if TYPE_CHECKING:
+    from ..llm.client import LLMClient
 
 __all__ = ["run", "Agent"]
 
@@ -84,14 +93,27 @@ def _execute_action(
 def run(
     request: str,
     transactions: Sequence[Transaction],
+    llm_client: "LLMClient | None" = None,
 ) -> AgentState:
     """Execute the full deterministic agent lifecycle for a request.
 
     Returns a fully populated :class:`AgentState` whose ``trajectory`` records
     every lifecycle stage and whose ``response`` holds the grounded natural
     language answer. The state is inspectable after execution.
+
+    ``llm_client`` is the provider-neutral injection point defined in
+    ``docs/10_llm_integration_design.md``. When provided, its model identity is
+    recorded on the state for observability; the deterministic lifecycle is
+    otherwise unchanged and makes no model calls in this phase.
     """
     state = AgentState(request=request)
+    if llm_client is not None:
+        identifier = getattr(llm_client, "model_identifier", None)
+        state.model_identifier = identifier or type(llm_client).__name__
+        state.record(
+            TrajectoryStage.RECEIVED,
+            f"LLM client injected: {state.model_identifier}",
+        )
     state.record(TrajectoryStage.RECEIVED, f"received request: {request!r}")
 
     # 1. Understand.
@@ -170,11 +192,25 @@ class Agent:
     Holds the loaded transaction set so repeated requests can be executed
     against the same data without reloading. The agent itself is stateless
     across requests except for the transaction set it carries.
+
+    An optional provider-neutral ``llm_client`` may be injected for future
+    model-powered interactions. In this phase it is carried (and its identity
+    recorded per execution) without affecting the deterministic lifecycle.
     """
 
-    def __init__(self, transactions: Sequence[Transaction]) -> None:
+    def __init__(
+        self,
+        transactions: Sequence[Transaction],
+        llm_client: "LLMClient | None" = None,
+    ) -> None:
         self.transactions = tuple(transactions)
+        self.llm_client = llm_client
+
+    @property
+    def has_llm_client(self) -> bool:
+        """True when a client has been injected."""
+        return self.llm_client is not None
 
     def execute(self, request: str) -> AgentState:
         """Run the agent lifecycle against the carried transactions."""
-        return run(request, self.transactions)
+        return run(request, self.transactions, llm_client=self.llm_client)

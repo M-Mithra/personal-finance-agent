@@ -245,6 +245,18 @@ Each decision record should contain:
 - **Consequences:** Replanning only applies to intents that need follow-up; simple intents execute a single action and respond.
 - **Related Documentation:** `04_agent_design.md` (section 10), `06_implementation.md` (section 6.1)
 
+### DEC-019 - Provider-Neutral LLM Abstraction Before Provider Selection
+
+- **Date:** 2026-08-09
+- **Area:** Agent / LLM
+- **Status:** DECIDED
+- **Decision:** Implement the provider-neutral LLM abstraction (package `llm/`) before selecting any provider: the `LLMClient` interface (`client.py`), structured provider-neutral response types (`types.py`: `ToolCall`, `ModelResponse`, `LLMRequest`), model-facing tool definitions (`tool_definitions.py`), a typed error vocabulary (`errors.py`), and a deterministic scripted `FakeLLMClient` (`fake.py`). The Agent Runtime exposes an injectable `llm_client` boundary (`run(..., llm_client=...)` and `Agent(transactions, llm_client=...)`) that records the model identity on `AgentState` without changing the deterministic lifecycle. No SDK, credentials, prompt, or model call is introduced.
+- **Context / Problem:** The runtime must not depend on any provider SDK, and the deterministic system must keep working while the model-powered slice is designed.
+- **Alternatives Considered:** Selecting a provider first; embedding model logic in the `Agent` class; adding LangChain/LangGraph for abstraction.
+- **Rationale:** A provider-neutral interface plus deterministic fake keeps all existing tests deterministic, lets defensive behavior be tested, and preserves the design's provider-neutral boundary (DEC-015, `docs/10_llm_integration_design.md` section 16).
+- **Consequences:** The LLM proposes, the runtime validates/executes/verifies. Full model-powered execution is the next slice and is not implemented here.
+- **Related Documentation:** `docs/10_llm_integration_design.md` (sections 7, 16), `docs/06_implementation.md` (sections 4, 5, Slice 5)
+
 ## 5. Decisions by Engineering Area
 
 | Area | Current Status |
@@ -257,6 +269,7 @@ Each decision record should contain:
 | Data Model | Initial logical model decided |
 | Analytical Tools | First five deterministic capabilities implemented within the established boundaries |
 | Agent Runtime | Deterministic runtime scaffold implemented (lifecycle, state, understanding, planning, tools, replanning, response) |
+| LLM Abstraction | Provider-neutral interface and FakeLLMClient implemented; no provider selected |
 | LLM / Model Selection | OPEN/TBD |
 | Memory | OPEN/TBD; persistent memory not required initially |
 | RAG | OPEN/TBD; not required initially unless justified |
@@ -284,6 +297,7 @@ No superseded decisions yet.
 | TBD | Project documentation and architecture established as the initial baseline. | Establish the starting engineering record. | DEC-001 through DEC-010 |
 | 2026-08-09 | Deterministic foundation slice implemented: canonical transaction model, CSV loading and validation, normalization, five analytical capabilities, deterministic verification, synthetic dataset, and 84 unit tests. | Provide verified deterministic capabilities before any agent development. | DEC-011 through DEC-014 |
 | 2026-08-09 | Deterministic agent runtime implemented: explicit lifecycle state (`runtime/state.py`), deterministic understanding (`runtime/understanding.py`), planning (`runtime/planning.py`), tool/action interface (`runtime/tools.py`), verification wiring (`runtime/checks.py`), bounded replanning (`runtime/replanning.py`), grounded response generation (`runtime/response.py`), and the runtime loop (`runtime/agent.py`). | Establish the agent lifecycle, interfaces, and state representation before any LLM is introduced. | DEC-015 through DEC-018 |
+| 2026-08-09 | Provider-neutral LLM abstraction implemented: `llm/client.py` (`LLMClient` interface and response validation), `llm/types.py` (structured response types), `llm/tool_definitions.py` (model-facing tool metadata), `llm/errors.py` (typed failure vocabulary), `llm/fake.py` (deterministic `FakeLLMClient`), and an injectable `llm_client` boundary on `run()` and `Agent`. | Establish the LLM boundary before any provider selection, keeping the deterministic runtime authoritative and unchanged. | DEC-019 |
 
 ## 8. Future Decision Areas
 

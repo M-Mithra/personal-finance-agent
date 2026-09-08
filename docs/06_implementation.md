@@ -112,7 +112,7 @@ The initial implementation can use the Python standard library for the following
 
 No additional runtime dependency is selected at this stage. A data-processing library, LLM client, CLI library, configuration package, structured logging package, or other framework may be added later only when an evaluated requirement justifies it.
 
-An LLM API or provider is not selected. The implementation should keep request understanding and response generation behind a provider-neutral boundary so a later choice does not alter deterministic analytics or the canonical data model.
+An LLM API or provider is not selected. The provider-neutral LLM abstraction (`llm/`) is implemented with the standard library only: it defines the interface, structured response types, error vocabulary, tool definitions, and a deterministic fake client. No SDK, credentials, or provider configuration are introduced.
 
 # 4. Project Structure
 
@@ -142,6 +142,13 @@ personal-finance-agent/
 │       ├── normalization.py
 │       ├── synthetic.py
 │       ├── analytics.py
+│       ├── llm/
+│       │   ├── __init__.py
+│       │   ├── client.py
+│       │   ├── types.py
+│       │   ├── tool_definitions.py
+│       │   ├── errors.py
+│       │   └── fake.py
 │       ├── tools.py
 │       ├── agent.py
 │       ├── verification.py
@@ -153,6 +160,7 @@ personal-finance-agent/
 │   ├── test_validation.py
 │   ├── test_normalization.py
 │   ├── test_analytics.py
+│   ├── test_llm.py
 │   ├── test_tools.py
 │   ├── test_agent.py
 │   └── test_verification.py
@@ -180,6 +188,7 @@ personal-finance-agent/
 The first implementation slice (deterministic data foundation) is now implemented: `models.py`, `data.py`, `validation.py`, `normalization.py`, `synthetic.py`, `analytics.py`, and `verification.py` exist with tests under `tests/` and safe synthetic data at `data/sample/transactions.csv`.
 
 The second slice (deterministic agent runtime) is now implemented under `src/personal_finance_agent/runtime/`: `state.py` (explicit lifecycle state and trajectory), `understanding.py` (deterministic intent recognition), `planning.py` (structured action planning), `tools.py` (the tool/action interface wrapping the analytical capabilities), `checks.py` (verification wiring and trust classification), `replanning.py` (bounded follow-up decisions), `response.py` (grounded deterministic response generation), and `agent.py` (the runtime loop wiring all stages together). The `Agent` class carries a transaction set and exposes `execute(request) -> AgentState`. `config.py` and `observability.py` remain deferred. `main.py` remains the temporary compatibility entry point.
+The third slice (provider-neutral LLM abstraction) is now implemented under `src/personal_finance_agent/llm/`: `client.py` (the `LLMClient` abstraction and independent response validation), `types.py` (structured response types including `ToolCall`, `ModelResponse`, `LLMRequest`), `tool_definitions.py` (model-facing metadata for the five analytical tools), `errors.py` (provider-neutral failure vocabulary), and `fake.py` (the deterministic `FakeLLMClient`). `run()` and `Agent` accept an optional `llm_client` injection boundary that records the model identity on state without changing the deterministic lifecycle. No provider SDK, credentials, prompt, or model call is introduced.
 
 # 5. Module and Component Mapping
 
@@ -190,7 +199,7 @@ The second slice (deterministic agent runtime) is now implemented under `src/per
 | Request Understanding | `runtime/understanding.py` | Interpret supported requests and identify intent, scope, ambiguity, and next work. Deterministic keyword-matching strategy; provider-neutral boundary for future LLM replacement. |
 | Agent State | `runtime/state.py` | Explicit lifecycle state and trajectory recording. |
 | Agent Planning | `runtime/planning.py` | Create structured action sequences based on recognized intent and available capabilities. |
-| Agent / Decision Layer | `runtime/agent.py` | Maintain state, select actions, observe results, replan, request verification, and decide when to respond. |
+| Agent / Decision Layer | `runtime/agent.py` | Maintain state, select actions, observe results, replan, request verification, and decide when to respond. Accepts an optional provider-neutral `llm_client` (injection boundary) without changing the deterministic lifecycle. |
 | Tool / Action Interface | `runtime/tools.py` | Dispatch selected analytical capabilities with validated structured inputs. |
 | Verification Wiring | `runtime/checks.py` | Map tool results to verification functions and classify trust. |
 | Replanning | `runtime/replanning.py` | Bounded follow-up decisions after observing results. |
@@ -198,6 +207,11 @@ The second slice (deterministic agent runtime) is now implemented under `src/per
 | Data Access / Transaction Data Layer | `data.py` | Load and provide scoped canonical transactions while preserving source references. |
 | Result Validation / Verification | `verification.py` | Validate tool outputs and verify important calculations and response claims. |
 | Response Generation | `runtime/response.py` | Produce grounded responses from verified or explicitly qualified results. |
+| LLM Client Interface | `llm/client.py` | Provider-neutral `LLMClient` abstraction (`model_identifier`, `complete`, `reason`, `generate_response`) plus independent `validate_model_response`; no provider SDK. |
+| LLM Types | `llm/types.py` | Provider-neutral structured response types (`ModelResponse`, `ToolCall`, `LLMRequest`); no chain-of-thought stored. |
+| LLM Tool Definitions | `llm/tool_definitions.py` | Metadata describing the five analytical tools to a model (name, description, argument schema); no analytical implementation. |
+| LLM Errors | `llm/errors.py` | Provider-neutral failure vocabulary (malformed output, unavailable, timeout, context, exhausted sequence). |
+| Fake LLM Client | `llm/fake.py` | Deterministic scripted `FakeLLMClient` for tests: sequenced responses, request recording, and scriptable failure modes. |
 | Observability | `observability.py` and `logging` | Track execution identifiers, agent steps, actions, statuses, timing, errors, and verification outcomes. |
 
 These are software boundaries within one application, not separate deployable services or packages by necessity.
@@ -666,6 +680,10 @@ Load a controlled transaction sample, construct canonical transactions, validate
 ## Slice 4 - Observability and evaluation preparation
 
 Improve execution event recording, failure visibility, test fixtures, and evaluation-case support.
+
+## Slice 5 - Provider-neutral LLM abstraction
+
+**Status: implemented.** Defines the boundary between the Agent Runtime and any future model without choosing a provider: the `LLMClient` interface (`llm/client.py`), structured response types (`llm/types.py`), tool definitions (`llm/tool_definitions.py`), the error vocabulary (`llm/errors.py`), and the deterministic `FakeLLMClient` (`llm/fake.py`). The runtime accepts an injectable `llm_client` (`run(..., llm_client=...)`, `Agent(transactions, llm_client=...)`) that records the model identity on state while the deterministic lifecycle remains unchanged. No model-powered execution, provider SDK, or prompt exists yet; that is the first model-powered slice.
 
 Each slice should remain runnable and testable before the next slice is added. Advanced capabilities should not block a useful deterministic first slice.
 

@@ -410,7 +410,9 @@ Persistent memory (database, vector store, or durable conversation history) is n
 
 ## 16.1 Conceptual abstraction: `LLMClient`
 
-A single conceptual interface, `LLMClient` (the name is illustrative and not final), isolates the runtime from any specific model provider. Its responsibilities are:
+**Implementation status (2026-08-09):** The conceptual `LLMClient` is now concrete in `src/personal_finance_agent/llm/`. `client.py` defines the `LLMClient` ABC (`model_identifier`, `complete`, `reason`, `generate_response`) plus an independent `validate_model_response` checker; `types.py` defines the structured response types (`ToolCall`, `ModelResponse`, `LLMRequest`, `ModelMetadata`); `tool_definitions.py`, `errors.py`, and `fake.py` define tool metadata, the error vocabulary, and the deterministic `FakeLLMClient`. `run()` and `Agent` accept an injectable `llm_client` that records model identity on `AgentState` without changing the deterministic lifecycle. No provider is selected and no SDK is imported.
+
+A single conceptual interface, `LLMClient`, isolates the runtime from any specific model provider. Its responsibilities are:
 
 - **Send structured context/instructions to a model:** The runtime passes the constructed context (Section 6) plus the relevant instruction layer (Section 17) in a provider-neutral structure.
 - **Receive a structured model response:** The client parses and validates the model output into the runtime's structured decision types (intent, plan, tool call, response proposal). Model output whose structure cannot be validated is surfaced as a malformed-output error.

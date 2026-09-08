@@ -136,6 +136,7 @@ class AgentState:
     completed_actions: list[str] = field(default_factory=list)
     observations: list[Observation] = field(default_factory=list)
     verification_records: list[VerificationRecord] = field(default_factory=list)
+    model_identifier: str | None = None
     errors: list[str] = field(default_factory=list)
     assumptions: list[str] = field(default_factory=list)
     trajectory: list[TrajectoryEntry] = field(default_factory=list)
