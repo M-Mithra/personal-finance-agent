@@ -30,6 +30,7 @@ from .errors import (
     ResponseSequenceExhaustedError,
 )
 from .fake import FakeLLMClient
+from .ollama import OllamaLLMClient
 from .tool_definitions import (
     DEFAULT_TOOL_DEFINITIONS,
     ToolArgumentSchema,
@@ -61,6 +62,7 @@ __all__ = [
     "ModelResponse",
     "ModelTimeoutError",
     "ModelUnavailableError",
+    "OllamaLLMClient",
     "RESPONSE_TYPE_FINAL",
     "RESPONSE_TYPE_TOOL_CALL",
     "ResponseSequenceExhaustedError",

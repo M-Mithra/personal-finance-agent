@@ -282,6 +282,18 @@ Each decision record should contain:
 - **Consequences:** First Ollama-backed `LLMClient` implementation will target Qwen3 1.7B. Tool definitions must be explicit. Runtime validation remains authoritative. Qwen3 4B remains a benchmark/reference model. Model selection can be revisited after integration-level evaluation.
 - **Related Documentation:** `docs/10_llm_integration_design.md`, `docs/11_local_llm_integration.md`, `docs/06_implementation.md`, `docs/07_testing_and_evaluation.md`
 
+### DEC-022 - Ollama-Backed LLM Provider Adapter
+
+- **Date:** 2026-08-09
+- **Area:** Agent / LLM / Implementation
+- **Status:** DECIDED
+- **Decision:** Implement the first concrete `LLMClient` as `OllamaLLMClient` in `src/personal_finance_agent/llm/ollama.py`, adapting the provider-neutral interface to Ollama's local HTTP API (`POST /api/chat`). The adapter uses stdlib HTTP only (`urllib.request`, `json`, `socket`); no SDK dependency. It is non-streaming initially (`stream: false`). Model, base URL, timeout, and generation options are configurable. Provider/transport failures are mapped to the existing provider-neutral error hierarchy. JSON format is request-dependent rather than unconditional. The adapter remains behind the provider-neutral `LLMClient`; the deterministic runtime remains the control boundary.
+- **Context / Problem:** The provider-neutral `LLMClient` abstraction (DEC-019) is complete but had no real provider implementation. To run the agent against a real model, a concrete adapter is needed. Ollama was chosen as the first experimental runtime (DEC-020) and Qwen3 1.7B as the provisional first model (DEC-021).
+- **Alternatives Considered:** Using the official Ollama Python SDK (rejected — adds a dependency for no functional benefit; stdlib HTTP is sufficient for the initial non-streaming use case); streaming support (deferred — adds complexity not needed for the initial trajectory); unconditional JSON format (rejected — couples the adapter to JSON mode unnecessarily; tool calls use Ollama's native `tools` mechanism).
+- **Rationale:** A stdlib-only adapter keeps the project dependency-light while making the `LLMClient` abstraction executable against a real model. Keeping it behind the provider-neutral interface preserves the ability to swap providers later. Non-streaming simplifies the initial implementation. Configurable model/URL/timeout allow experimentation without code changes.
+- **Consequences:** The agent can now be run against a real local model once Ollama is installed and the model is pulled. The adapter does not execute tools, calculate results, or bypass verification — those responsibilities remain with the deterministic runtime. Future providers can be added as additional `LLMClient` implementations without touching the runtime.
+- **Related Documentation:** `docs/10_llm_integration_design.md` (sections 7, 16), `docs/11_local_llm_integration.md`, `docs/06_implementation.md` (Slice 6)
+
 ## 5. Decisions by Engineering Area
 
 | Area | Current Status |
@@ -295,6 +307,7 @@ Each decision record should contain:
 | Analytical Tools | First five deterministic capabilities implemented within the established boundaries |
 | Agent Runtime | Deterministic runtime scaffold implemented (lifecycle, state, understanding, planning, tools, replanning, response) |
 | LLM Abstraction | Provider-neutral interface and FakeLLMClient implemented; no provider selected |
+| LLM Provider Adapter | First concrete adapter (`OllamaLLMClient`) implemented behind `LLMClient`; stdlib HTTP only |
 | Local Inference | Feasibility experiments complete (Ollama 0.33.3, Qwen3 4B + 1.7B on M2/8 GB); Qwen3 1.7B provisionally selected for MVP |
 | LLM / Model Selection | PROVISIONAL — Qwen3 1.7B (not permanent) |
 | Memory | OPEN/TBD; persistent memory not required initially |
@@ -326,6 +339,7 @@ No superseded decisions yet.
 | 2026-08-09 | Provider-neutral LLM abstraction implemented: `llm/client.py` (`LLMClient` interface and response validation), `llm/types.py` (structured response types), `llm/tool_definitions.py` (model-facing tool metadata), `llm/errors.py` (typed failure vocabulary), `llm/fake.py` (deterministic `FakeLLMClient`), and an injectable `llm_client` boundary on `run()` and `Agent`. | Establish the LLM boundary before any provider selection, keeping the deterministic runtime authoritative and unchanged. | DEC-019 |
 | 2026-08-09 | Local LLM experiment designed: Ollama + Qwen3 4B proposed as the first experimental backend; documented in `docs/11_local_llm_integration.md`. No runtime, SDK, model download, or inference code introduced. | Evaluate local inference before committing to a paid hosted API; preserve the provider-neutral `LLMClient` boundary. | DEC-020 |
 | 2026-08-09 | Local LLM feasibility experiments completed on Apple M2 (8 GB) with Ollama 0.33.3, comparing Qwen3 4B and Qwen3 1.7B. Qwen3 1.7B provisionally selected as the first MVP model (DEC-021); Qwen3 4B retained as evaluation baseline. | Empirical results favored 1.7B for latency on constrained hardware while 4B showed stronger reasoning; provider-neutral `LLMClient` boundary preserved. | DEC-021 |
+| 2026-08-09 | First concrete provider adapter implemented: `OllamaLLMClient` (`llm/ollama.py`) adapts the provider-neutral `LLMClient` to Ollama's local HTTP API using stdlib only (no SDK); non-streaming, configurable model/URL/timeout, request-dependent JSON format, provider errors mapped to the existing error hierarchy (DEC-022). | Make the provider-neutral abstraction executable against a real model while keeping the project dependency-light. | DEC-022 |
 
 ## 8. Future Decision Areas
 

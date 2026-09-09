@@ -783,21 +783,33 @@ Results" above), the **provisional** decision is:
 * Neither Ollama nor Qwen3 1.7B is a permanent architectural commitment. The
   `LLMClient` boundary is.
 
-## 11.25 Handoff to Implementation
+## 11.25 Implementation Status and Next Steps
 
-After this design is approved, the next implementation phase should:
+The first concrete provider adapter has been implemented: `OllamaLLMClient`
+(`src/personal_finance_agent/llm/ollama.py`) adapts the provider-neutral
+`LLMClient` to Ollama's local HTTP API using stdlib only (no SDK dependency).
+This is documented in `docs/06_implementation.md` (Slice 6) and
+`docs/09_decisions_and_changes.md` (DEC-022).
 
-1. Install Ollama locally.
-2. Verify the local runtime works (e.g. basic model call).
-3. Download the selected Qwen3 4B model.
-4. Run a basic local inference test (unstructured prompt).
-5. Verify structured-output and/or tool-calling capabilities experimentally.
-6. Implement the Ollama-backed ``LLMClient`` adapter.
-7. Connect it to the existing agent runtime.
-8. Run the first spending-change explanation trajectory (§11.10).
-9. Evaluate the trajectory and response using the cases in §11.15.
-10. Record latency, memory usage, and quality observations.
-11. Decide whether to retain Qwen3 4B or test alternatives.
+### Completed
+
+* Provider-neutral `LLMClient` abstraction (`llm/` package).
+* Feasibility experiments comparing Qwen3 4B and Qwen3 1.7B.
+* Provisional model selection: Qwen3 1.7B (DEC-021).
+* First concrete adapter: `OllamaLLMClient` (DEC-022).
+
+### Remaining
+
+1. Install Ollama locally (if not already present).
+2. Verify the local runtime works.
+3. Download the selected Qwen3 1.7B model.
+4. Run a basic local inference test (e.g. a simple prompt).
+5. Verify structured output / tool-calling capabilities.
+6. Connect the adapter to the existing agent runtime.
+7. Run the first spending-change explanation trajectory.
+8. Evaluate the trajectory and response against the criteria in §11.14–§11.16.
+9. Record results, including model/runtime versions and hardware context (§11.22).
+10. Decide whether to retain Qwen3 1.7B or test alternatives.
 
 These steps will be executed in a future implementation phase.
 
