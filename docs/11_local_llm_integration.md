@@ -631,18 +631,157 @@ The following remain unresolved and will be decided through experiment:
 * Retry policy and timeout values
 * Fallback strategy if local inference is unavailable
 
+
+---
+
+## Local LLM Experiment Results
+
+> **Status:** initial feasibility experiments complete. These are preliminary
+> findings from a small set of manually constructed cases, not a statistically
+> rigorous benchmark. Reported durations and token counts are approximate and
+> were observed on the development hardware only.
+
+### Experiment environment
+
+| Item | Value |
+|---|---|
+| Machine | Apple Silicon MacBook Air |
+| Chip | Apple M2 |
+| Unified memory | 8 GB |
+| Inference runtime | Ollama 0.33.3 |
+| Acceleration | Apple Metal |
+| Models tested | Qwen3 4B, Qwen3 1.7B |
+
+---
+
+### Qwen3 4B results
+
+#### Experiment 1 — structured JSON
+
+Prompted for structured JSON output.
+
+* Structured JSON output succeeded.
+* Required fields were produced correctly.
+* No extra prose appeared in the model content.
+* Approximate total duration: **6.88s**.
+* Approximate `eval_count`: **148**.
+
+#### Experiment 2 — tool calling with ambiguous month/year
+
+User asked:
+
+> "Why did my September spending increase compared with August?"
+
+* Correct tool selected: `compare_period_spending`.
+* Tool-call structure was valid.
+* The model **invented the year 2023** when none was provided
+  (temporal ambiguity / unsupported-assumption failure).
+* Arguments: `period1 = 2023-08`, `period2 = 2023-09`.
+* Approximate total duration: **41.9s**.
+* Approximate `eval_count`: **912**.
+
+#### Experiment 3 — tool calling with explicit dates
+
+User asked:
+
+> "Why did my September 2026 spending increase compared with August 2026?"
+
+* Correct tool selected.
+* Correct arguments: `period1 = 2026-08`, `period2 = 2026-09`.
+* Approximate total duration: **40.1s**.
+* Approximate `eval_count`: **771**.
+
+#### Experiment 4 — additional analysis planning
+
+Given verified totals plus `category_spending` and `compare_period_spending`
+tools, the model was asked to plan next steps.
+
+* Correctly recognized that total comparison alone was insufficient to explain
+  the cause.
+* Requested category-level analysis for both August and September.
+* Correct tool selection and arguments.
+* Approximate total duration: **31.4s**.
+* Approximate `eval_count`: **668**.
+
+#### Experiment 5 — grounded response generation
+
+Given verified period totals and verified category totals:
+
+* Correctly identified **Shopping** and **Entertainment** as the largest
+  contributors.
+* Correctly identified **Food** and **Transport** as smaller contributors.
+* Correctly identified **Bills** and **Other** as unchanged.
+* Correctly avoided inventing transaction-level causes.
+* Correctly recognized that the evidence did not establish **why** individual
+  categories increased.
+* Approximate total duration: **87.4s**.
+* Approximate `eval_count`: **1789**.
+
+#### Qwen3 4B assessment
+
+**Strengths**
+
+* Strong tool selection.
+* Strong structured tool-call behavior.
+* Strong grounded interpretation.
+* Good evidence discipline.
+* Better reasoning quality than 1.7B in the tested scenarios.
+
+**Weaknesses**
+
+* Very high latency on tool selection and especially response generation.
+* Unsupported temporal assumption when the year was ambiguous.
+* Local hardware/resource constraints make interactive use potentially
+  impractical.
+
+**Classification**
+
+* Quality: **promising**
+* Latency: **concerning**
+* Overall status: **evaluation baseline; not selected for initial MVP**
+
+> Qwen3 4B is not permanently rejected. It remains available as a local
+> evaluation baseline.
 ## 11.24 Initial Decision
 
-The current decision is:
+Based on the initial feasibility experiments (see "Local LLM Experiment
+Results" above), the **provisional** decision is:
 
-> We will initially investigate Ollama running Qwen3 4B locally as an experimental LLM backend for the Personal Finance Agent. This is not yet a permanent model or runtime commitment. The provider-neutral ``LLMClient`` remains the architectural boundary.
+> **Qwen3 1.7B is provisionally selected as the first local model for MVP
+> integration through the provider-neutral `LLMClient`.** Ollama is the
+> initial experimental inference runtime. This is a **provisional
+> implementation choice, not a permanent model selection.**
 
-This decision:
+### Rationale
 
-* Does **not** permanently commit the project to Ollama as the inference runtime.
-* Does **not** permanently commit the project to Qwen3 4B as the model.
-* Does **not** abandon the provider-neutral ``LLMClient`` abstraction.
-* Does **not** redesign the existing agent runtime or verification architecture.
+* Qwen3 1.7B demonstrated **sufficient capability** for the tested agent
+  behaviors: tool selection, multi-step planning, evidence-driven reasoning,
+  and grounded response generation.
+* **Substantially lower latency** on the available M2/8 GB hardware
+  (approximately 4–12 seconds on several agent-oriented tests, versus
+  approximately 30–87 seconds for Qwen3 4B).
+* Tool calling works **when tool contracts are explicit**, which the runtime
+  already enforces through `runtime/tools.py` and `validate_model_response()`.
+* **Deterministic runtime safeguards** (tool validation, independent
+  verification, authoritative analytical tools) compensate for known
+  weaknesses such as sensitivity to prompt clarity and occasional
+  argument-ordering errors.
+* The provider-neutral `LLMClient` boundary **preserves the ability to
+  replace the model later** without redesigning the agent.
+
+### Important qualifications
+
+* This is a **provisional** choice. It can be revisited after integration-level
+  evaluation (section 14).
+* Qwen3 1.7B demonstrated **sensitivity to tool-contract clarity** and produced
+  incorrect tool-argument ordering under weaker instructions. Therefore
+  runtime-side validation, deterministic tools, and independent verification
+  remain **mandatory**, not optional.
+* **Qwen3 4B remains installed as a local evaluation baseline** and may be
+  reconsidered if Qwen3 1.7B proves insufficient during integration and full
+  evaluation. It is not deleted.
+* Neither Ollama nor Qwen3 1.7B is a permanent architectural commitment. The
+  `LLMClient` boundary is.
 
 ## 11.25 Handoff to Implementation
 
@@ -661,3 +800,145 @@ After this design is approved, the next implementation phase should:
 11. Decide whether to retain Qwen3 4B or test alternatives.
 
 These steps will be executed in a future implementation phase.
+
+---
+
+### Qwen3 1.7B results
+
+#### Experiment 1 — grounded response (weaker instructions)
+
+Given verified totals and category spending:
+
+* Correctly identified **Shopping** as the dominant contributor.
+* Correctly recognized **Food**, **Transport**, and **Entertainment** also
+  increased.
+* Correctly recognized **Bills** and **Other** as unchanged.
+* **The initial response incorrectly stated that Transport stayed the same**,
+  despite the underlying reasoning correctly calculating `+INR 500`.
+* Approximate total duration: **22.1s**.
+* Approximate `eval_count`: **930**.
+
+#### Experiment 2 — tool calling (explicit dates, no strengthened semantics)
+
+User asked about August 2026 vs September 2026, without explicit parameter
+ordering guidance:
+
+* Correct tool selected.
+* **Incorrect argument ordering:** `period1 = 2026-09`, `period2 = 2026-08`,
+  which violated the tool contract.
+* Approximate total duration: **7.42s**.
+* Approximate `eval_count`: **370**.
+
+#### Experiment 3 — tool calling with explicit semantics and example
+
+With explicit instructions that `period1` MUST be earlier, `period2` MUST be
+later, and an example (`August 2026 -> September 2026`):
+
+* Correct tool selected.
+* Correct arguments: `period1 = 2026-08`, `period2 = 2026-09`.
+* Approximate total duration: **4.42s**.
+* Approximate `eval_count`: **187**.
+
+#### Experiment 4 — multi-step analysis planning
+
+Given verified total comparison plus `category_spending` and
+`compare_period_spending` tools:
+
+* Correctly recognized that category-level evidence was needed.
+* Correctly avoided simply repeating the already-verified total comparison.
+* Selected `category_spending` and requested September 2026 category analysis.
+* Approximate total duration: **8.43s**.
+* Approximate `eval_count`: **366**.
+
+#### Experiment 5 — grounded response with stronger instructions
+
+Given verified totals and verified category spending with strengthened
+response instructions:
+
+* Correctly identified **Shopping** as the dominant contributor.
+* Correctly recognized other category increases.
+* Correctly recognized **Bills** and **Other** as unchanged.
+* Final response was concise and generally grounded.
+* **The hidden reasoning still contained unsupported possibilities** (e.g. a
+  sale, new purchase, or change in spending habits), but these were **not
+  presented as established facts** in the final response.
+* Approximate total duration: **11.97s**.
+* Approximate `eval_count`: **569**.
+
+#### Qwen3 1.7B assessment
+
+**Strengths**
+
+* Much lower latency than Qwen3 4B.
+* Correct tool calling when tool semantics are explicit.
+* Capable of basic evidence-driven planning.
+* Capable of grounded response generation.
+* Better suited to constrained local hardware.
+
+**Weaknesses**
+
+* More sensitive to prompt/tool-contract quality.
+* Demonstrated incorrect tool-argument ordering under weaker instructions.
+* Demonstrated a factual contradiction in an earlier final response
+  (Experiment 1).
+* Planning may be less complete than 4B.
+* Requires strong runtime validation and deterministic analytical authority.
+
+**Classification**
+
+* Quality: **promising with guardrails**
+* Latency: **substantially better**
+* Overall status: **provisional initial MVP candidate**
+
+---
+
+### Comparative findings
+
+> These experiments are preliminary and were conducted on a small set of
+> manually constructed cases. They are **not** a statistically rigorous
+> benchmark.
+
+| Model | Tool calling | Grounded response | Observed latency | Main weakness | Current status |
+|---|---|---|---|---|---|
+| Qwen3 4B | Strong, including under ambiguity in tool call structure | Strong; avoided unsupported claims | ~30–87s per step | Very high latency; invented year under temporal ambiguity | Evaluation baseline; not selected for initial MVP |
+| Qwen3 1.7B | Correct when semantics are explicit; failed ordering under weaker instructions | Generally grounded; one factual contradiction observed under weaker instructions | ~4–22s per step | Sensitive to contract clarity; weaker planning than 4B | Provisional initial MVP candidate |
+
+---
+
+### Architectural interpretation
+
+The experiments **reinforce the existing architecture** in which:
+
+* The **LLM proposes actions and generates grounded language**; it does not
+  compute financial facts.
+* **Deterministic tools remain authoritative** for arithmetic and analytical
+  computation (`analytics.py`).
+* The **runtime validates tool names and arguments** before execution
+  (`runtime/tools.py`, `runtime/agent.py`).
+* **Verification is independent of the model** (`runtime/checks.py`,
+  `verification.py`).
+* A failed verification **cannot be overridden by the model**.
+* **Evidence, not model confidence, determines established financial facts**.
+
+Specific observations that support this:
+
+* **Temporal ambiguity (4B, Experiment 2):** the model invented `2023` when no
+  year was given. A deterministic runtime must not trust such unsupported
+  assumptions; explicit period handling and validation are required.
+* **Tool-argument ordering (1.7B, Experiment 2):** the model reversed
+  `period1`/`period2` under weaker instructions. Runtime argument validation
+  must catch contract violations even when the model is otherwise capable.
+* **Hidden-reasoning mismatch (1.7B, Experiment 5):** the model's internal
+  reasoning contained unsupported possibilities while the final response was
+  more conservative. This confirms that **the application must not depend on
+  hidden reasoning traces**. The final structured output and verified evidence
+  are what matter.
+* **Factual contradiction (1.7B, Experiment 1):** the underlying reasoning was
+  correct (`+INR 500`) but the final prose was wrong ("stayed the same"). This
+  further confirms that **grounded responses must be traceable to verified
+  observations**, not to model prose alone.
+
+The observed sensitivity of 1.7B to **tool-contract clarity and explicit
+instructions** confirms that **strong tool definitions and explicit prompts
+materially affect small-model reliability**, which is exactly what the
+deterministic runtime and verification layers are designed to mitigate.
