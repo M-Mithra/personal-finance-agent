@@ -844,7 +844,12 @@ The agent is a coordinator and interpreter. It does not become a replacement for
 # 26. Open Questions / TBD
 
 The following agent-design questions remain unresolved:
-
+- **Model/provider:** Qwen3 1.7B via Ollama is the provisional MVP model (DEC-021, DEC-023). Provider-neutral `LLMClient` boundary preserved.
+- **LLM-driven loop:** Implemented in `runtime/llm_loop.py` (DEC-023, provisional/experimental): bounded loop with `LLMLoopConfig` (max_model_steps=6, max_tool_calls=4, max_consecutive_repeats=2, retry_invalid=1), `LLMTerminationReason`, `ToolCallValidation`, `build_llm_request`, `summarise_observation_for_llm`, `validate_llm_tool_call`, `grounding_gate`, and `run_llm_loop`. Invalid proposals (malformed output or failed tool-call validation) retry within the same step via an inner retry loop; `FakeLLMClient`-raised malformed output is retryable, other `LLMError` subclasses terminate as `model_error` (a `ResponseSequenceExhaustedError` arriving mid-retry terminates as `max_retries_invalid`). Model period arguments (`YYYY-MM` strings, `(year, month)` pairs) are coerced to `Period` objects before execution, with booleans rejected (`True`/`False` are `int` subclasses and must not be treated as `1`/`0`). Deterministic `run()` remains unchanged and default.
+- **Reversed periods (DEC-023):** `period_comparison` with `period_a > period_b` is REJECTED deterministically at semantic validation (not normalized); order is semantically meaningful (`absolute_difference = total_b - total_a`). The model receives an explicit invalid-proposal error and may retry with corrected order.
+- **Hybrid pending-actions (DEC-023):** after each validated model tool call, the first pending action with the same tool name is consumed (by name) to avoid duplicate planned evidence; remaining unproposed planned actions are gap-filled deterministically through the same execute -> observe -> verify path with budget checks. Gap-fill does not bypass verification and cannot execute invalid actions (the plan is deterministic, never model input).
+- **Grounding gate:** MVP deterministic gating layer checks currency-anchored monetary figures (e.g. "USD 400.00"; bare years/counts are not claims) in final-response drafts against verified observations. Not a semantic claim verifier: a correct number with a wrong qualitative explanation may still pass.
+- **Clarification:** Unsupported/ambiguous requests may terminate with clarification response and no tool execution. Architecture extensible for future multi-turn clarification; not implemented now.
 - Which exact model or reasoning mechanism, if any, will support request understanding and interpretation?
 - What model interaction strategy will be used?
 - What prompt architecture, if any, is appropriate?
@@ -859,11 +864,13 @@ The following agent-design questions remain unresolved:
 - ~~How will important analytical results be verified in implementation?~~ Implemented: `runtime/checks.py` wires tool results to `verification.py` and classifies trust (verified/failed/inconclusive/unverified).
 - What retry and error-recovery strategy is appropriate?
 - What evaluation dataset will test agent behavior?
+- **Invalid-output policy:** One bounded retry; second consecutive invalid model output terminates safely.
 - What evaluation metrics and test thresholds should be defined later?
 - What observability implementation and retention policy are appropriate?
 - What privacy controls are required for prompts, context, action inputs, and observable state?
 - Which analytical capabilities and pattern definitions belong in the MVP?
 - How should ambiguous terms such as "recently" be handled for the supported use cases?
+- **Termination reasons:** `LLMTerminationReason` enum: `budget_steps`, `budget_tool_calls`, `max_consecutive_repeats`, `model_error`, `max_retries_invalid`, `grounding_fallback`, `response_complete`, `unsupported`, `ambiguous`.
 
 These questions remain TBD and should be resolved through data design, implementation, testing, and evaluation rather than by assuming a specific framework, provider, storage mechanism, or architecture.
 

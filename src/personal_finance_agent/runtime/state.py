@@ -73,6 +73,7 @@ class TrajectoryStage(StrEnum):
     RECEIVED = "received"
     UNDERSTAND = "understand"
     PLAN = "plan"
+    LLM_DECISION = "llm_decision"
     EXECUTE = "execute"
     OBSERVE = "observe"
     VERIFY = "verify"
@@ -137,6 +138,9 @@ class AgentState:
     observations: list[Observation] = field(default_factory=list)
     verification_records: list[VerificationRecord] = field(default_factory=list)
     model_identifier: str | None = None
+    llm_steps_used: int = 0
+    tool_calls_used: int = 0
+    termination_reason: str | None = None
     errors: list[str] = field(default_factory=list)
     assumptions: list[str] = field(default_factory=list)
     trajectory: list[TrajectoryEntry] = field(default_factory=list)

@@ -785,33 +785,72 @@ Results" above), the **provisional** decision is:
 
 ## 11.25 Implementation Status and Next Steps
 
-The first concrete provider adapter has been implemented: `OllamaLLMClient`
-(`src/personal_finance_agent/llm/ollama.py`) adapts the provider-neutral
-`LLMClient` to Ollama's local HTTP API using stdlib only (no SDK dependency).
-This is documented in `docs/06_implementation.md` (Slice 6) and
-`docs/09_decisions_and_changes.md` (DEC-022).
+The local LLM experiment is complete and its empirical results have informed
+the next implementation phase. The first concrete provider adapter has been
+implemented: `OllamaLLMClient` (`src/personal_finance_agent/llm/ollama.py`)
+adapts the provider-neutral `LLMClient` to Ollama's local HTTP API using
+stdlib only (no SDK dependency). This is documented in `docs/06_implementation.md`
+(Slice 6) and `docs/09_decisions_and_changes.md` (DEC-022).
 
 ### Completed
 
 * Provider-neutral `LLMClient` abstraction (`llm/` package).
-* Feasibility experiments comparing Qwen3 4B and Qwen3 1.7B.
-* Provisional model selection: Qwen3 1.7B (DEC-021).
+* Feasibility experiments comparing Qwen3 4B and Qwen3 1.7B (empirical results recorded in §11.24).
+* Provisional model selection: Qwen3 1.7B for MVP, Qwen3 4B retained as evaluation baseline (DEC-021).
 * First concrete adapter: `OllamaLLMClient` (DEC-022).
+* LLM-driven execution loop: implemented in `runtime/llm_loop.py` (DEC-023, provisional/experimental).
 
-### Remaining
+### Completed — LLM-driven execution loop (DEC-023)
 
-1. Install Ollama locally (if not already present).
-2. Verify the local runtime works.
-3. Download the selected Qwen3 1.7B model.
-4. Run a basic local inference test (e.g. a simple prompt).
-5. Verify structured output / tool-calling capabilities.
-6. Connect the adapter to the existing agent runtime.
-7. Run the first spending-change explanation trajectory.
-8. Evaluate the trajectory and response against the criteria in §11.14–§11.16.
-9. Record results, including model/runtime versions and hardware context (§11.22).
-10. Decide whether to retain Qwen3 1.7B or test alternatives.
+1. Bounded LLM-driven execution loop (`runtime/llm_loop.py`): `run_llm_loop()` calls `LLMClient.complete()` as a reasoning subroutine, validates proposals, executes tools via the existing `tools.execute_tool`, verifies results via the existing `checks.verify_for`, updates `AgentState`, and repeats within bounded iteration.
+2. Deterministic unit tests using `FakeLLMClient` (no Ollama required): `tests/test_llm_loop.py` (35 tests, all passing).
+3. Provider-neutral integration: the loop depends on `LLMClient`, not on Ollama.
+4. Live Qwen3 trajectory tests under `tests/integration/` (skipped unless Ollama is reachable).
 
-These steps will be executed in a future implementation phase.
+### Remaining after implementation
+
+1. Wire the loop into the broader agent surface (opt-in entry point, not replacing `run()`).
+2. Full evaluation of the spending-change explanation trajectory against Qwen3 1.7B.
+3. Decide whether to retain Qwen3 1.7B or test alternatives after integration-level evaluation.
+
+The deterministic `run()` lifecycle and all existing tests remain unchanged.
+
+---
+
+### Experiment 6 — LLM-driven loop live verification (2026-09-11, `qwen3:1.7b`)
+
+First live exercise of the implemented `run_llm_loop` against local Ollama
+(`OllamaLLMClient(model="qwen3:1.7b")`, standard fixture transactions).
+Prompt: "Why did my spending increase in September?" Observable info only;
+no chain-of-thought recorded.
+
+Run A (grounded success, re-verified 2026-09-11): 2 model calls, 2 tool calls
+(`noteworthy_transactions` 2025-09, then `period_comparison` 2025-08/2025-09),
+0 retries, termination `response_complete`, ~16s. All observations verified.
+Final response grounded (September $780.00 vs August $400.00, +95%,
+OnlineShop $700.00 / FreshMart $60.00 / MonthEnd $20.00).
+
+Run B (grounded success, re-verified 2026-09-11): 2 model calls, 2 tool calls
+(`spending_summary`, then `period_comparison`), 0 retries, termination
+`response_complete`, ~43s. All observations verified. Final response grounded
+(September $780.00 vs August $400.00, +$380.00 absolute) with interpretations
+explicitly marked as interpretations.
+
+An earlier session run had additionally exercised the budget-bound path:
+3 model calls, 4 tool calls, 1 invalid proposal (model proposed reversed
+`period_a="2025-09" > period_b="2025-08"`, rejected at semantic validation
+per the DEC-023 reversed-period rule), then deterministic gap-fill executed
+the remaining planned evidence; termination `budget_tool_calls` (~41s).
+Fallback response from the deterministic renderer (Spending increased by
+USD 380.00 in 2025-09 with category/merchant contributors); every observation
+verified, no invented figures.
+
+Interpretation: reversed-period rejection and the budget-bound fallback path
+have both fired live at least once and the loop recovered safely within
+budgets. Live-model behavior is non-deterministic across runs
+(tool selection and response_complete vs budget_tool_calls vary on identical
+prompts), which is why budgets, verification, and the grounding/deterministic
+fallback exist. DEC-023 stays provisional/experimental pending review.
 
 ---
 
