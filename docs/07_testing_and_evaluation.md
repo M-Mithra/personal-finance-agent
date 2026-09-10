@@ -660,6 +660,31 @@ Capture execution state and action sequences, inspect failures, and classify roo
 
 Preserve validated deterministic, agent, safety, and end-to-end cases and rerun them after material changes.
 
+## LLM-driven loop evidence (DEC-023, recorded 2026-09-11)
+
+The bounded LLM-driven execution loop (`runtime/llm_loop.py`, DEC-023,
+provisional/experimental, awaiting review) is covered deterministically by
+`tests/test_llm_loop.py`: 35 tests, all passing with `FakeLLMClient`
+(no Ollama required); full suite 210/210 passing. The suite covers single and
+multiple tool calls, successive replanning, unknown tools, invalid/missing
+arguments, invalid period format, reversed periods (rejected at semantic
+validation, not normalized — order defines
+`absolute_difference = total_b - total_a`), malformed/empty model output,
+genuine failed verification (patched `verify_for`, kept distinct from the
+currency-anchored grounding rejection tests), inconclusive verification,
+model timeout/unavailability, exhausted responses, model-step and tool-call
+budgets, repeated identical calls
+(`spending_summary(period="2025-08")`, bound `max_consecutive_repeats=2`
+on identical tool+args), grounded finals, unsupported-figure fallback,
+correct-number/wrong-explanation pass-through (accepted MVP limitation),
+provider neutrality (no Ollama import in the loop), hybrid pending-action
+consume-by-name + gap-fill through execute -> verify with budget checks, the
+deterministic `run()` regression, and raw-transaction exclusion from model
+context. Loop bounds: `max_model_steps=6`, `max_tool_calls=4`,
+`max_consecutive_repeats=2`, `retry_invalid=1` (same-step inner retry).
+Live `qwen3:1.7b` results are recorded in `docs/11_local_llm_integration.md`
+(Experiment 6), not here, since live-model behavior is non-deterministic.
+
 # 31. Testing and Evaluation Decisions
 
 | Decision | Rationale | Status |
