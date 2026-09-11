@@ -1,0 +1,525 @@
+{
+  "metadata": {
+    "generated_from": "data/sample/transactions.csv",
+    "generator": "personal_finance_agent.synthetic (seed=20250801)",
+    "generated_at": "2026-09-11",
+    "verified_at": "2026-09-11",
+    "currency": "USD",
+    "note": "All values generated and verified from the deterministic analytics module"
+  },
+  "dataset_summary": {
+    "total_records": 64,
+    "accepted": 64,
+    "rejected": 0,
+    "periods": [
+      "2025-08",
+      "2025-09"
+    ],
+    "currency": "USD",
+    "single_currency": true
+  },
+  "periods": {
+    "august_2025": {
+      "label": "2025-08",
+      "start": "2025-08-01",
+      "end": "2025-08-31",
+      "period_id": "2025-08",
+      "spending_summary": {
+        "total": "3459.67",
+        "transaction_count": 31,
+        "status": "success"
+      },
+      "category_analysis": {
+        "total_spending": "3459.67",
+        "category_count": 10,
+        "uncovered_amount": "0",
+        "all_categories_covered": true,
+        "categories": [
+          {
+            "category": "Housing",
+            "total": "1450.00",
+            "count": 1,
+            "ids": [
+              "T202508-001"
+            ]
+          },
+          {
+            "category": "Travel",
+            "total": "807.40",
+            "count": 2,
+            "ids": [
+              "T202508-030",
+              "T202508-031"
+            ]
+          },
+          {
+            "category": "Groceries",
+            "total": "330.30",
+            "count": 7,
+            "ids": [
+              "T202508-009",
+              "T202508-010",
+              "T202508-011",
+              "T202508-012",
+              "T202508-013",
+              "T202508-014",
+              "T202508-015"
+            ]
+          },
+          {
+            "category": "Transport",
+            "total": "232.55",
+            "count": 6,
+            "ids": [
+              "T202508-020",
+              "T202508-021",
+              "T202508-022",
+              "T202508-023",
+              "T202508-024",
+              "T202508-025"
+            ]
+          },
+          {
+            "category": "Utilities",
+            "total": "194.69",
+            "count": 3,
+            "ids": [
+              "T202508-003",
+              "T202508-004",
+              "T202508-005"
+            ]
+          },
+          {
+            "category": "Entertainment",
+            "total": "134.93",
+            "count": 2,
+            "ids": [
+              "T202508-027",
+              "T202508-032"
+            ]
+          },
+          {
+            "category": "Shopping",
+            "total": "106.50",
+            "count": 2,
+            "ids": [
+              "T202508-028",
+              "T202508-029"
+            ]
+          },
+          {
+            "category": "Dining",
+            "total": "98.48",
+            "count": 4,
+            "ids": [
+              "T202508-016",
+              "T202508-017",
+              "T202508-018",
+              "T202508-019"
+            ]
+          },
+          {
+            "category": "Health",
+            "total": "78.84",
+            "count": 2,
+            "ids": [
+              "T202508-008",
+              "T202508-026"
+            ]
+          },
+          {
+            "category": "Subscriptions",
+            "total": "25.98",
+            "count": 2,
+            "ids": [
+              "T202508-006",
+              "T202508-007"
+            ]
+          }
+        ]
+      },
+      "merchant_analysis": {
+        "total_spending": "3459.67",
+        "merchant_count": 24,
+        "unattributed_amount": "0",
+        "top_merchants": [
+          {
+            "merchant": "Metro Apartments",
+            "total": "1450.00",
+            "count": 1,
+            "ids": [
+              "T202508-001"
+            ]
+          },
+          {
+            "merchant": "Skyline Air",
+            "total": "425.00",
+            "count": 1,
+            "ids": [
+              "T202508-030"
+            ]
+          },
+          {
+            "merchant": "Harbor Grand Hotel",
+            "total": "382.40",
+            "count": 1,
+            "ids": [
+              "T202508-031"
+            ]
+          },
+          {
+            "merchant": "FreshMart",
+            "total": "267.20",
+            "count": 4,
+            "ids": [
+              "T202508-009",
+              "T202508-010",
+              "T202508-011",
+              "T202508-012"
+            ]
+          },
+          {
+            "merchant": "Corner Gas",
+            "total": "150.25",
+            "count": 3,
+            "ids": [
+              "T202508-021",
+              "T202508-022",
+              "T202508-023"
+            ]
+          },
+          {
+            "merchant": "Riverview Concert Hall",
+            "total": "120.00",
+            "count": 1,
+            "ids": [
+              "T202508-032"
+            ]
+          },
+          {
+            "merchant": "City Power",
+            "total": "88.50",
+            "count": 1,
+            "ids": [
+              "T202508-003"
+            ]
+          }
+        ]
+      },
+      "noteworthy_transactions": {
+        "rule": "largest 5 expense(s) by amount, descending; ties broken by transaction_id",
+        "limit": 5,
+        "largest": [
+          {
+            "rank": 1,
+            "id": "T202508-001",
+            "date": "2025-08-01",
+            "amount": "1450.00",
+            "desc": "Monthly apartment rent",
+            "merchant": "Metro Apartments",
+            "category": "Housing"
+          },
+          {
+            "rank": 2,
+            "id": "T202508-030",
+            "date": "2025-08-18",
+            "amount": "425.00",
+            "desc": "Round-trip flight",
+            "merchant": "Skyline Air",
+            "category": "Travel"
+          },
+          {
+            "rank": 3,
+            "id": "T202508-031",
+            "date": "2025-08-19",
+            "amount": "382.40",
+            "desc": "Hotel stay",
+            "merchant": "Harbor Grand Hotel",
+            "category": "Travel"
+          },
+          {
+            "rank": 4,
+            "id": "T202508-032",
+            "date": "2025-08-25",
+            "amount": "120.00",
+            "desc": "Concert tickets",
+            "merchant": "Riverview Concert Hall",
+            "category": "Entertainment"
+          },
+          {
+            "rank": 5,
+            "id": "T202508-003",
+            "date": "2025-08-03",
+            "amount": "88.50",
+            "desc": "Electricity bill",
+            "merchant": "City Power",
+            "category": "Utilities"
+          }
+        ]
+      }
+    },
+    "september_2025": {
+      "label": "2025-09",
+      "start": "2025-09-01",
+      "end": "2025-09-30",
+      "period_id": "2025-09",
+      "spending_summary": {
+        "total": "3162.20",
+        "transaction_count": 29,
+        "status": "success"
+      },
+      "category_analysis": {
+        "total_spending": "3162.20",
+        "category_count": 9,
+        "uncovered_amount": "0",
+        "all_categories_covered": true,
+        "categories": [
+          {
+            "category": "Housing",
+            "total": "1450.00",
+            "count": 1,
+            "ids": [
+              "T202509-033"
+            ]
+          },
+          {
+            "category": "Shopping",
+            "total": "755.33",
+            "count": 3,
+            "ids": [
+              "T202509-060",
+              "T202509-061",
+              "T202509-062"
+            ]
+          },
+          {
+            "category": "Groceries",
+            "total": "357.14",
+            "count": 7,
+            "ids": [
+              "T202509-041",
+              "T202509-042",
+              "T202509-043",
+              "T202509-044",
+              "T202509-045",
+              "T202509-046",
+              "T202509-047"
+            ]
+          },
+          {
+            "category": "Transport",
+            "total": "213.22",
+            "count": 6,
+            "ids": [
+              "T202509-052",
+              "T202509-053",
+              "T202509-054",
+              "T202509-055",
+              "T202509-056",
+              "T202509-057"
+            ]
+          },
+          {
+            "category": "Utilities",
+            "total": "194.69",
+            "count": 3,
+            "ids": [
+              "T202509-035",
+              "T202509-036",
+              "T202509-037"
+            ]
+          },
+          {
+            "category": "Dining",
+            "total": "77.96",
+            "count": 4,
+            "ids": [
+              "T202509-048",
+              "T202509-049",
+              "T202509-050",
+              "T202509-051"
+            ]
+          },
+          {
+            "category": "Health",
+            "total": "73.33",
+            "count": 2,
+            "ids": [
+              "T202509-040",
+              "T202509-058"
+            ]
+          },
+          {
+            "category": "Subscriptions",
+            "total": "25.98",
+            "count": 2,
+            "ids": [
+              "T202509-038",
+              "T202509-039"
+            ]
+          },
+          {
+            "category": "Entertainment",
+            "total": "14.55",
+            "count": 1,
+            "ids": [
+              "T202509-059"
+            ]
+          }
+        ]
+      },
+      "merchant_analysis": {
+        "total_spending": "3162.20",
+        "merchant_count": 22,
+        "unattributed_amount": "0",
+        "top_merchants": [
+          {
+            "merchant": "Metro Apartments",
+            "total": "1450.00",
+            "count": 1,
+            "ids": [
+              "T202509-033"
+            ]
+          },
+          {
+            "merchant": "TechMall Online",
+            "total": "649.00",
+            "count": 1,
+            "ids": [
+              "T202509-062"
+            ]
+          },
+          {
+            "merchant": "FreshMart",
+            "total": "294.48",
+            "count": 4,
+            "ids": [
+              "T202509-041",
+              "T202509-042",
+              "T202509-043",
+              "T202509-044"
+            ]
+          },
+          {
+            "merchant": "Corner Gas",
+            "total": "139.44",
+            "count": 3,
+            "ids": [
+              "T202509-053",
+              "T202509-054",
+              "T202509-055"
+            ]
+          },
+          {
+            "merchant": "City Power",
+            "total": "88.50",
+            "count": 1,
+            "ids": [
+              "T202509-035"
+            ]
+          },
+          {
+            "merchant": "Mall Outlet",
+            "total": "81.70",
+            "count": 1,
+            "ids": [
+              "T202509-060"
+            ]
+          },
+          {
+            "merchant": "Broadband Co",
+            "total": "64.99",
+            "count": 1,
+            "ids": [
+              "T202509-037"
+            ]
+          }
+        ]
+      },
+      "noteworthy_transactions": {
+        "rule": "largest 5 expense(s) by amount, descending; ties broken by transaction_id",
+        "limit": 5,
+        "largest": [
+          {
+            "rank": 1,
+            "id": "T202509-033",
+            "date": "2025-09-01",
+            "amount": "1450.00",
+            "desc": "Monthly apartment rent",
+            "merchant": "Metro Apartments",
+            "category": "Housing"
+          },
+          {
+            "rank": 2,
+            "id": "T202509-062",
+            "date": "2025-09-20",
+            "amount": "649.00",
+            "desc": "Laptop purchase",
+            "merchant": "TechMall Online",
+            "category": "Shopping"
+          },
+          {
+            "rank": 3,
+            "id": "T202509-035",
+            "date": "2025-09-03",
+            "amount": "88.50",
+            "desc": "Electricity bill",
+            "merchant": "City Power",
+            "category": "Utilities"
+          },
+          {
+            "rank": 4,
+            "id": "T202509-041",
+            "date": "2025-09-06",
+            "amount": "82.63",
+            "desc": "Weekly grocery shopping",
+            "merchant": "FreshMart",
+            "category": "Groceries"
+          },
+          {
+            "rank": 5,
+            "id": "T202509-060",
+            "date": "2025-09-17",
+            "amount": "81.70",
+            "desc": "Clothing",
+            "merchant": "Mall Outlet",
+            "category": "Shopping"
+          }
+        ]
+      }
+    }
+  },
+  "period_comparison": {
+    "aug_vs_sep": {
+      "period_a": {
+        "label": "2025-08",
+        "id": "2025-08"
+      },
+      "period_b": {
+        "label": "2025-09",
+        "id": "2025-09"
+      },
+      "total_a": "3459.67",
+      "total_b": "3162.20",
+      "absolute_difference": "-297.47",
+      "percentage_difference": "-8.60",
+      "change_direction": "decrease",
+      "count_a": 31,
+      "count_b": 29,
+      "status": "success"
+    }
+  },
+  "notes": {
+    "non_spending_transactions": [
+      "T202508-002: Salary deposit (income, 5200.00) - NOT spending",
+      "T202509-034: Salary deposit (income, 5200.00) - NOT spending",
+      "T202509-063: Refund (49.00) - NOT spending",
+      "T202509-064: Transfer to savings (200.00) - NOT spending"
+    ],
+    "key_observations": {
+      "august_travel_total": "807.40 USD (flight 425.00 + hotel 382.40)",
+      "september_laptop": "649.00 USD laptop at TechMall Online",
+      "net_change": "-297.47 USD (-8.60%) decrease from August to September"
+    }
+  }
+}

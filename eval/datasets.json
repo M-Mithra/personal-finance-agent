@@ -1,0 +1,55 @@
+{
+  "metadata": {
+    "version": "1.0.0",
+    "created": "2026-09-11",
+    "description": "Personal Finance Agent Evaluation Specification - Dataset definitions",
+    "provisional": true
+  },
+  "datasets": {
+    "dataset_a": {
+      "id": "dataset_a",
+      "name": "Baseline - August/September 2025 Synthetic",
+      "description": "Deterministic synthetic transaction dataset covering August and September 2025 with meaningful variation between periods.",
+      "source": "data/sample/transactions.csv",
+      "generator": "personal_finance_agent.synthetic.build_synthetic_transactions (seed=20250801)",
+      "transaction_count": 64,
+      "currency": "USD",
+      "periods": [
+        "2025-08",
+        "2025-09"
+      ],
+      "characteristics": {
+        "monthly_variation": "Spending decreased from 3459.67 USD (August) to 3162.20 USD (September), a decrease of 297.47 USD (8.60%)",
+        "has_income": true,
+        "has_refunds": true,
+        "has_transfers": true,
+        "all_transactions_attributed": true,
+        "single_currency": true
+      }
+    },
+    "dataset_b": {
+      "id": "dataset_b",
+      "name": "Richer - Extended Synthetic Dataset (PLANNED)",
+      "description": "Planned synthetic evaluation dataset with extended coverage.",
+      "status": "planned - deferred",
+      "periods": [
+        "2025-07",
+        "2025-08",
+        "2025-09",
+        "2025-10",
+        "2025-11"
+      ],
+      "currency": "USD",
+      "planned_characteristics": {
+        "multiple_months": true,
+        "includes_empty_month": "October 2025",
+        "includes_boundary_dates": true,
+        "includes_refund_reversal": true,
+        "includes_income": true,
+        "includes_transfer": true,
+        "single_currency": true
+      },
+      "note": "Creation deferred - Dataset A provides sufficient coverage for initial evaluation."
+    }
+  }
+}

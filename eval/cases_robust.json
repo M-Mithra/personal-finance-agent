@@ -1,0 +1,213 @@
+{
+  "suite": "robustness",
+  "description": "Robustness and edge-case testing - 8 evaluation cases (EVAL-021 through EVAL-028)",
+  "case_count": 8,
+  "cases": [
+    {
+      "case_id": "EVAL-021",
+      "category": "edge_case",
+      "dataset": "dataset_a",
+      "user_prompt": "Compare my spending for August 2025 versus August 2025",
+      "expected_intent": "period_comparison",
+      "fact_establishing_tools": [
+        "period_comparison"
+      ],
+      "explanation_supporting_tools": [],
+      "acceptable_argument_constraints": {
+        "period_a": "August 2025",
+        "period_b": "August 2025 (identical periods)"
+      },
+      "expected_deterministic_facts": {
+        "identical_periods": true,
+        "expected_difference": "0.00 USD",
+        "expected_direction": "no_change"
+      },
+      "forbidden_claims": [
+        "Claiming a difference exists when periods are identical"
+      ],
+      "expected_behavior": "Agent handles identical periods gracefully - zero difference, no_change direction.",
+      "safety_relevant": false,
+      "human_review_focus": "Does agent handle identical periods without error or contradiction?",
+      "notes": "Edge case: identical periods for comparison",
+      "suite": "robustness"
+    },
+    {
+      "case_id": "EVAL-022",
+      "category": "edge_case",
+      "dataset": "dataset_a",
+      "user_prompt": "What was my spending in October 2025?",
+      "expected_intent": "spending_summary",
+      "fact_establishing_tools": [
+        "spending_summary"
+      ],
+      "explanation_supporting_tools": [],
+      "acceptable_argument_constraints": {
+        "period": "October 2025 (not present in Dataset A)"
+      },
+      "expected_deterministic_facts": {
+        "period_in_dataset": false,
+        "expected_behavior": "return empty result or state no data available"
+      },
+      "forbidden_claims": [
+        "Fabricating October spending figures"
+      ],
+      "expected_behavior": "Agent handles request for period not in dataset by returning empty result or stating no data.",
+      "safety_relevant": false,
+      "human_review_focus": "Does agent fabricate data or correctly report no data exists?",
+      "notes": "Edge case: request for period with no data in the dataset",
+      "suite": "robustness"
+    },
+    {
+      "case_id": "EVAL-023",
+      "category": "edge_case",
+      "dataset": "dataset_a",
+      "user_prompt": "Show me my spending for 2025-13",
+      "expected_intent": "spending_summary",
+      "fact_establishing_tools": [],
+      "explanation_supporting_tools": [],
+      "acceptable_argument_constraints": {
+        "period": "invalid - month 13 does not exist"
+      },
+      "expected_deterministic_facts": {
+        "valid_period": false,
+        "expected_behavior": "reject invalid month or return error"
+      },
+      "forbidden_claims": [
+        "Treating month 13 as a valid month"
+      ],
+      "expected_behavior": "Agent recognizes month 13 is invalid and rejects, clarifies, or returns error.",
+      "safety_relevant": false,
+      "human_review_focus": "Does agent handle invalid input gracefully?",
+      "notes": "Edge case: invalid month number (13) in period specification",
+      "suite": "robustness"
+    },
+    {
+      "case_id": "EVAL-024",
+      "category": "edge_case",
+      "dataset": "dataset_a",
+      "user_prompt": "How much did I spend?",
+      "expected_intent": "ambiguous",
+      "fact_establishing_tools": [],
+      "explanation_supporting_tools": [],
+      "acceptable_argument_constraints": {},
+      "expected_deterministic_facts": {
+        "period_specified": false,
+        "expected_behavior": "request clarification about which period"
+      },
+      "forbidden_claims": [
+        "Picking arbitrary period without asking"
+      ],
+      "expected_behavior": "Agent recognizes no period specified and requests clarification (AMBIGUOUS status).",
+      "safety_relevant": false,
+      "human_review_focus": "Does agent ask for clarification rather than guessing?",
+      "notes": "Edge case: unspecified request with no temporal reference",
+      "suite": "robustness"
+    },
+    {
+      "case_id": "EVAL-025",
+      "category": "edge_case",
+      "dataset": "dataset_a",
+      "user_prompt": "Show me my 0 largest expenses for August 2025",
+      "expected_intent": "noteworthy_transactions",
+      "fact_establishing_tools": [],
+      "explanation_supporting_tools": [],
+      "acceptable_argument_constraints": {
+        "period": "August 2025",
+        "limit": "0 (invalid - must be >= 1)"
+      },
+      "expected_deterministic_facts": {
+        "valid_limit": false,
+        "expected_behavior": "reject invalid limit"
+      },
+      "forbidden_claims": [
+        "Processing request with invalid limit value"
+      ],
+      "expected_behavior": "Analytics raises ValueError for limit < 1; tool layer should reject invalid argument.",
+      "safety_relevant": false,
+      "human_review_focus": "Does system validate tool arguments?",
+      "notes": "Edge case: invalid tool argument (limit=0 violates limit >= 1)",
+      "suite": "robustness"
+    },
+    {
+      "case_id": "EVAL-026",
+      "category": "edge_case",
+      "dataset": "dataset_a",
+      "user_prompt": "What were my largest expenses without specifying a period?",
+      "expected_intent": "ambiguous",
+      "fact_establishing_tools": [],
+      "explanation_supporting_tools": [],
+      "acceptable_argument_constraints": {
+        "period": "missing - required for noteworthy_transactions"
+      },
+      "expected_deterministic_facts": {
+        "period_specified": false,
+        "expected_behavior": "request clarification or return ambiguous/error"
+      },
+      "forbidden_claims": [
+        "Using default period without clarifying"
+      ],
+      "expected_behavior": "Agent recognizes missing required period and asks for clarification or returns ambiguous/error.",
+      "safety_relevant": false,
+      "human_review_focus": "Does agent recognize missing required parameters?",
+      "notes": "Edge case: missing required parameter for tool",
+      "suite": "robustness"
+    },
+    {
+      "case_id": "EVAL-027",
+      "category": "edge_case",
+      "dataset": "dataset_a",
+      "user_prompt": "Run the super_analyzer tool on my August spending",
+      "expected_intent": "unsupported",
+      "fact_establishing_tools": [],
+      "explanation_supporting_tools": [],
+      "acceptable_argument_constraints": {
+        "tool": "super_analyzer (does not exist)"
+      },
+      "expected_deterministic_facts": {
+        "tool_exists": false,
+        "supported_tools": [
+          "spending_summary",
+          "category_analysis",
+          "period_comparison",
+          "merchant_analysis",
+          "noteworthy_transactions"
+        ]
+      },
+      "forbidden_claims": [
+        "Pretending the super_analyzer tool exists"
+      ],
+      "expected_behavior": "Agent recognizes super_analyzer is not supported, explains available tools, or returns error.",
+      "safety_relevant": false,
+      "human_review_focus": "Does agent handle non-existent tool requests gracefully?",
+      "notes": "Edge case: request for a tool that does not exist",
+      "suite": "robustness"
+    },
+    {
+      "case_id": "EVAL-028",
+      "category": "edge_case",
+      "dataset": "dataset_a",
+      "user_prompt": "What was my spending in August 2025 and September 2025 combined?",
+      "expected_intent": "spending_summary",
+      "fact_establishing_tools": [
+        "spending_summary"
+      ],
+      "explanation_supporting_tools": [],
+      "acceptable_argument_constraints": {
+        "interpretation": "may require two spending_summary calls or custom multi-month period"
+      },
+      "expected_deterministic_facts": {
+        "august_total": "3459.67 USD",
+        "september_total": "3162.20 USD",
+        "combined_total": "6621.87 USD"
+      },
+      "forbidden_claims": [
+        "Providing incorrect combined total"
+      ],
+      "expected_behavior": "Agent may invoke spending_summary twice and sum results, or interpret as custom multi-month period.",
+      "safety_relevant": false,
+      "human_review_focus": "Does agent handle non-standard aggregation reasonably?",
+      "notes": "Edge case: multi-period aggregation request",
+      "suite": "robustness"
+    }
+  ]
+}
