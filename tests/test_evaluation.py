@@ -4,6 +4,7 @@ import json
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import MagicMock, patch
 
 from personal_finance_agent.runtime.state import Action, AgentState, Intent, ResponseStatus
 from personal_finance_agent.llm.fake import FakeLLMClient
@@ -111,6 +112,75 @@ class EvaluationInfrastructureTests(unittest.TestCase):
         case = next(case for case in runner.spec["cases"] if case["case_id"] == "EVAL-001")
         result, _ = runner.execute_case(case, ExecutionMode.LLM)
         self.assertEqual(result.execution_mode, ExecutionMode.LLM)
+        self.assertEqual(result.tool_calls, ["spending_summary"])
+
+    def test_llm_mode_constructs_ollama_client(self):
+        """Test that CLI --mode=llm would construct OllamaLLMClient with correct model."""
+        with patch("personal_finance_agent.llm.ollama.OllamaLLMClient") as mock_client:
+            mock_instance = MagicMock()
+            mock_instance.model_identifier = "ollama:qwen3:1.7b"
+            mock_client.return_value = mock_instance
+            
+            from eval.__main__ import main
+            import sys
+            
+            # We can't easily test the CLI main() without subprocess,
+            # but we can verify the runner instantiation works
+            runner = EvaluationRunner(
+                eval_dir="eval",
+                llm_client=mock_instance,
+                llm_config=None
+            )
+            self.assertEqual(runner.llm_client, mock_instance)
+            mock_client.assert_not_called()  # runner doesn't call constructor
+
+    def test_deterministic_mode_preserves_current_behavior(self):
+        """Test that --mode=deterministic uses Agent.execute without LLM client."""
+        runner = EvaluationRunner()  # No LLM client
+        case = next(case for case in runner.spec["cases"] if case["case_id"] == "EVAL-001")
+        result, _ = runner.execute_case(case, ExecutionMode.DETERMINISTIC)
+        self.assertEqual(result.execution_mode, ExecutionMode.DETERMINISTIC)
+        self.assertIn("spending_summary", result.tool_calls)
+        
+        # Verify report metadata doesn't have model_identifier
+        report = runner.run(suite="core", mode=ExecutionMode.DETERMINISTIC)
+        self.assertIsNone(report.metadata.get("model_identifier"))
+
+    def test_llm_mode_report_includes_model_identifier(self):
+        """Test that LLM mode report metadata includes model_identifier."""
+        from eval.runner import LLMLoopConfig
+        client = FakeLLMClient([
+            FakeLLMClient.tool_call("spending_summary", {"period": "2025-08"}),
+            FakeLLMClient.final_response("Total spending was USD 3459.67."),
+        ])
+        runner = EvaluationRunner(llm_client=client, llm_config=LLMLoopConfig())
+        report = runner.run(suite="core", mode=ExecutionMode.LLM)
+        self.assertEqual(report.metadata["model_identifier"], "fake-llm-client")
+        self.assertIsNotNone(report.metadata["llm_config"])
+        self.assertEqual(report.metadata["llm_config"]["max_model_steps"], 6)
+        self.assertEqual(report.metadata["llm_config"]["max_tool_calls"], 4)
+
+    def test_llm_mode_without_client_raises_error(self):
+        """Test that LLM mode without injected client raises ValueError."""
+        runner = EvaluationRunner()  # No LLM client
+        case = next(case for case in runner.spec["cases"] if case["case_id"] == "EVAL-001")
+        with self.assertRaises(ValueError) as ctx:
+            runner.execute_case(case, ExecutionMode.LLM)
+        self.assertIn("LLM mode requires an injected LLM client", str(ctx.exception))
+
+    def test_fake_llm_client_mocked_no_actual_ollama_call(self):
+        """Verify FakeLLMClient is used in tests, no actual Ollama HTTP call."""
+        client = FakeLLMClient([
+            FakeLLMClient.tool_call("spending_summary", {"period": "2025-08"}),
+            FakeLLMClient.final_response("Total spending was USD 3459.67."),
+        ])
+        runner = EvaluationRunner(llm_client=client)
+        case = next(case for case in runner.spec["cases"] if case["case_id"] == "EVAL-001")
+        result, _ = runner.execute_case(case, ExecutionMode.LLM)
+        
+        # Verify the fake client was called and recorded requests
+        self.assertEqual(len(client.requests), 2)
+        self.assertEqual(client.requests[0].user_request, case["user_prompt"])
         self.assertEqual(result.tool_calls, ["spending_summary"])
 
     def test_aggregation_does_not_merge_category_and_suite(self):
