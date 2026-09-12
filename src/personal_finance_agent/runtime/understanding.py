@@ -23,6 +23,8 @@ __all__ = [
     "understand",
     "MONTH_NAMES",
     "DEFAULT_YEAR",
+    "CATEGORY_SYNONYMS",
+    "UNSUPPORTED_KEYWORDS",
 ]
 
 DEFAULT_YEAR: int = 2025
@@ -42,6 +44,17 @@ MONTH_NAMES: dict[str, int] = {
     "december": 12,
 }
 
+CATEGORY_SYNONYMS: dict[str, str] = {
+    "food": "dining",
+}
+
+UNSUPPORTED_KEYWORDS: tuple[str, ...] = (
+    "tax",
+    "investment",
+    "credit",
+    "loan",
+)
+
 
 @dataclass(frozen=True, slots=True)
 class UnderstandResult:
@@ -52,22 +65,9 @@ class UnderstandResult:
     periods: tuple[object, ...] = ()
     detail: str = ""
     warnings: tuple[str, ...] = ()
-# Intent recognition keywords. Order matters: the first intent whose keyword
-# set matches wins, so more specific patterns (spending-change explanation)
-# are checked before more general ones (spending summary).
+
+
 _INTENT_PATTERNS: tuple[tuple[Intent, tuple[str, ...]], ...] = (
-    (
-        Intent.SPENDING_CHANGE_EXPLANATION,
-        (
-            "why did",
-            "why was",
-            "what caused",
-            "spending change",
-            "spending increased",
-            "spending decreased",
-            "change in spending",
-        ),
-    ),
     (
         Intent.PERIOD_COMPARISON,
         (
@@ -86,6 +86,16 @@ _INTENT_PATTERNS: tuple[tuple[Intent, tuple[str, ...]], ...] = (
             "breakdown by",
             "spending by category",
             "by category",
+            "dining",
+            "housing",
+            "travel",
+            "groceries",
+            "transport",
+            "utilities",
+            "entertainment",
+            "shopping",
+            "health",
+            "subscriptions",
         ),
     ),
     (
@@ -93,11 +103,14 @@ _INTENT_PATTERNS: tuple[tuple[Intent, tuple[str, ...]], ...] = (
         (
             "merchant",
             "contributor",
+            "contribute",
             "vendor",
             "store",
             "shop",
             "who did i spend",
             "where did i spend",
+            "spent at",
+            "spend at",
         ),
     ),
     (
@@ -118,12 +131,23 @@ _INTENT_PATTERNS: tuple[tuple[Intent, tuple[str, ...]], ...] = (
             "how much did i spend",
             "total spent",
             "total spending",
-            "spending in",
+            "spending in ",
             "spending for",
-            "spend in",
+            "spend in ",
             "spend on",
             "summary",
-            "how much",
+            "why was",
+        ),
+    ),
+    (
+        Intent.SPENDING_CHANGE_EXPLANATION,
+        (
+            "why did",
+            "what caused",
+            "spending change",
+            "spending increased",
+            "spending decreased",
+            "change in spending",
         ),
     ),
 )
@@ -185,6 +209,23 @@ def _extract_periods(normalized: str) -> tuple[object, ...]:
             if period not in periods:
                 periods.append(period)
     return tuple(periods)
+
+
+def _apply_category_synonyms(normalized: str) -> str:
+    """Replace category synonyms with canonical category names."""
+    for synonym, canonical in CATEGORY_SYNONYMS.items():
+        normalized = normalized.replace(synonym, canonical)
+    return normalized
+
+
+def _check_unsupported(normalized: str) -> bool:
+    """Return True if the request contains an unsupported keyword."""
+    for keyword in UNSUPPORTED_KEYWORDS:
+        if keyword in normalized:
+            return True
+    return False
+
+
 def understand(request: str) -> UnderstandResult:
     """Determine the intent and relevant periods for a user request."""
     if not request or not request.strip():
@@ -195,6 +236,15 @@ def understand(request: str) -> UnderstandResult:
         )
 
     normalized = " " + request.strip().lower() + " "
+
+    if _check_unsupported(normalized):
+        return UnderstandResult(
+            intent=Intent.UNSUPPORTED,
+            intent_status=IntentStatus.UNSUPPORTED,
+            detail="unsupported topic",
+        )
+
+    normalized = _apply_category_synonyms(normalized)
     intent = _classify_intent(normalized)
     periods = _extract_periods(normalized)
 
@@ -208,7 +258,7 @@ def understand(request: str) -> UnderstandResult:
     needs_period = intent not in (Intent.UNSUPPORTED, Intent.AMBIGUOUS)
     if needs_period and not periods:
         return UnderstandResult(
-            intent=Intent.AMBIGUOUS,
+            intent=intent,
             intent_status=IntentStatus.AMBIGUOUS,
             periods=periods,
             detail=f"intent '{intent.value}' recognized but no period found",

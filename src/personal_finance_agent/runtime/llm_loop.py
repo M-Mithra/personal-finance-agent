@@ -454,7 +454,7 @@ def build_llm_request(
         instruction = (
             instruction
             + f"The interpreted intent for this request is '{state.intent.value}'. "
-            + "Use this as guidance, not as a constraint to override."
+            + "You must follow this intent and must not override it."
         )
 
     request = LLMRequest(

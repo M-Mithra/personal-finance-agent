@@ -38,7 +38,9 @@ from personal_finance_agent.runtime.tools import (
     tool_for,
 )
 from personal_finance_agent.runtime.understanding import (
+    CATEGORY_SYNONYMS,
     DEFAULT_YEAR,
+    UNSUPPORTED_KEYWORDS,
     UnderstandResult,
     understand,
 )
@@ -89,7 +91,7 @@ class TestUnderstanding(unittest.TestCase):
 
     def test_ambiguous_request(self) -> None:
         result = understand("How much did I spend?")
-        self.assertEqual(result.intent, Intent.AMBIGUOUS)
+        self.assertEqual(result.intent, Intent.SPENDING_SUMMARY)
         self.assertEqual(result.intent_status, IntentStatus.AMBIGUOUS)
 
     def test_empty_request(self) -> None:
@@ -101,6 +103,121 @@ class TestUnderstanding(unittest.TestCase):
         self.assertEqual(result.intent, Intent.SPENDING_SUMMARY)
         self.assertEqual(result.intent_status, IntentStatus.RECOGNIZED)
         self.assertEqual(result.periods[0], Period.for_month(DEFAULT_YEAR, 8))
+
+    def test_period_comparison_not_hijacked_by_why_did(self) -> None:
+        result = understand(
+            "Why did my August spending change compared with July 2025?"
+        )
+        self.assertEqual(result.intent, Intent.PERIOD_COMPARISON)
+        self.assertEqual(result.intent_status, IntentStatus.RECOGNIZED)
+
+    def test_period_comparison_not_hijacked_by_why_was(self) -> None:
+        result = understand(
+            "Why was there a difference between August and September?"
+        )
+        self.assertEqual(result.intent, Intent.PERIOD_COMPARISON)
+        self.assertEqual(result.intent_status, IntentStatus.RECOGNIZED)
+
+    def test_noteworthy_not_hijacked_by_why_was(self) -> None:
+        result = understand(
+            "What was my largest expense in August and why was it so high?"
+        )
+        self.assertEqual(result.intent, Intent.NOTEWORTHY_TRANSACTIONS)
+        self.assertEqual(result.intent_status, IntentStatus.RECOGNIZED)
+
+    def test_spending_summary_why_was_single_period(self) -> None:
+        result = understand("Why was my August spending 3459.67 USD?")
+        self.assertEqual(result.intent, Intent.SPENDING_SUMMARY)
+        self.assertEqual(result.intent_status, IntentStatus.RECOGNIZED)
+
+    def test_merchant_analysis_spent_at(self) -> None:
+        result = understand("How much did I spend at Amazon in August 2025?")
+        self.assertEqual(result.intent, Intent.MERCHANT_ANALYSIS)
+        self.assertEqual(result.intent_status, IntentStatus.RECOGNIZED)
+
+    def test_category_synonym_food_maps_to_dining(self) -> None:
+        result = understand("What did I spend on food in August?")
+        self.assertEqual(result.intent, Intent.CATEGORY_ANALYSIS)
+        self.assertEqual(result.intent_status, IntentStatus.RECOGNIZED)
+        self.assertIn("dining", CATEGORY_SYNONYMS.values())
+
+    def test_unsupported_tax(self) -> None:
+        result = understand("How much tax will I owe on my income?")
+        self.assertEqual(result.intent, Intent.UNSUPPORTED)
+        self.assertEqual(result.intent_status, IntentStatus.UNSUPPORTED)
+
+    def test_unsupported_investment(self) -> None:
+        result = understand("Should I invest my extra money in stocks?")
+        self.assertEqual(result.intent, Intent.UNSUPPORTED)
+        self.assertEqual(result.intent_status, IntentStatus.UNSUPPORTED)
+
+    def test_unsupported_credit(self) -> None:
+        result = understand("Can you give me a credit card?")
+        self.assertEqual(result.intent, Intent.UNSUPPORTED)
+        self.assertEqual(result.intent_status, IntentStatus.UNSUPPORTED)
+
+    def test_unsupported_loan(self) -> None:
+        result = understand("Should I take out a loan to buy a car?")
+        self.assertEqual(result.intent, Intent.UNSUPPORTED)
+        self.assertEqual(result.intent_status, IntentStatus.UNSUPPORTED)
+
+    def test_merchant_not_overridden_by_how_much(self) -> None:
+        result = understand(
+            "How much did restaurants contribute to my August spending increase?"
+        )
+        self.assertEqual(result.intent, Intent.MERCHANT_ANALYSIS)
+        self.assertEqual(result.intent_status, IntentStatus.RECOGNIZED)
+
+    def test_existing_ambiguous_how_much_recently(self) -> None:
+        result = understand("How much did I spend recently?")
+        self.assertEqual(result.intent, Intent.SPENDING_SUMMARY)
+        self.assertEqual(result.intent_status, IntentStatus.AMBIGUOUS)
+
+    def test_existing_ambiguous_why_spending_go_up(self) -> None:
+        result = understand("Why did my spending go up?")
+        self.assertEqual(result.intent, Intent.SPENDING_CHANGE_EXPLANATION)
+        self.assertEqual(result.intent_status, IntentStatus.AMBIGUOUS)
+
+    def test_existing_supported_spending_summary_aug(self) -> None:
+        result = understand("How much did I spend in August?")
+        self.assertEqual(result.intent, Intent.SPENDING_SUMMARY)
+        self.assertEqual(result.intent_status, IntentStatus.RECOGNIZED)
+
+    def test_existing_supported_category_sep(self) -> None:
+        result = understand("Show me spending by category for September")
+        self.assertEqual(result.intent, Intent.CATEGORY_ANALYSIS)
+        self.assertEqual(result.intent_status, IntentStatus.RECOGNIZED)
+
+    def test_period_a_before_period_b(self) -> None:
+        result = understand("Compare August 2025 and September 2025")
+        self.assertEqual(result.intent, Intent.PERIOD_COMPARISON)
+        self.assertEqual(result.intent_status, IntentStatus.RECOGNIZED)
+        self.assertEqual(len(result.periods), 2)
+        self.assertEqual(result.periods[0].label, "2025-08")
+        self.assertEqual(result.periods[1].label, "2025-09")
+
+    def test_unsupported_keywords_in_all(self) -> None:
+        for keyword in UNSUPPORTED_KEYWORDS:
+            result = understand(f"Question about {keyword}")
+            self.assertEqual(
+                result.intent,
+                Intent.UNSUPPORTED,
+                msg=f"keyword '{keyword}' should be unsupported",
+            )
+            self.assertEqual(
+                result.intent_status,
+                IntentStatus.UNSUPPORTED,
+                msg=f"keyword '{keyword}' should be unsupported",
+            )
+
+    def test_category_synonym_food_not_fabricated(self) -> None:
+        result = understand("What did I spend on food in August?")
+        self.assertEqual(result.intent, Intent.CATEGORY_ANALYSIS)
+        self.assertNotEqual(result.intent, Intent.SPENDING_SUMMARY)
+
+    def test_empty_request_still_unsupported(self) -> None:
+        result = understand("")
+        self.assertEqual(result.intent_status, IntentStatus.UNSUPPORTED)
 # --- B. Planning --------------------------------------------------------------
 
 

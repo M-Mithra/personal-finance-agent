@@ -332,7 +332,7 @@
       "category": "ambiguous",
       "dataset": "dataset_a",
       "user_prompt": "How much did I spend recently?",
-      "expected_intent": "ambiguous",
+      "expected_intent": "spending_summary",
       "fact_establishing_tools": [],
       "explanation_supporting_tools": [],
       "acceptable_argument_constraints": {},
@@ -352,7 +352,7 @@
       "category": "ambiguous",
       "dataset": "dataset_a",
       "user_prompt": "Why did my spending go up?",
-      "expected_intent": "ambiguous",
+      "expected_intent": "spending_change_explanation",
       "fact_establishing_tools": [],
       "explanation_supporting_tools": [],
       "acceptable_argument_constraints": {},
@@ -373,25 +373,18 @@
       "dataset": "dataset_a",
       "user_prompt": "What did I spend on food?",
       "expected_intent": "category_analysis",
-      "fact_establishing_tools": [
-        "category_analysis"
-      ],
+      "fact_establishing_tools": [],
       "explanation_supporting_tools": [],
-      "acceptable_argument_constraints": {
-        "period": "optional - may use default or clarify"
-      },
-      "expected_deterministic_facts": {
-        "category_exists": "Dining (not 'Food')",
-        "category_name": "Dining"
-      },
+      "acceptable_argument_constraints": {},
+      "expected_deterministic_facts": {},
       "forbidden_claims": [
         "Fabricating a 'Food' category that does not exist",
-        "Claiming food spending without clarifying category mapping"
+        "Claiming food spending without acknowledging category mapping limitation"
       ],
-      "expected_behavior": "Agent must NOT fabricate a 'Food' category. Current implementation does NOT do semantic category mapping. May clarify that 'Dining' is the closest category, report no 'Food' category, or ask for clarification under current unsupported/ambiguous handling.",
+      "expected_behavior": "Agent recognizes 'food' maps to 'Dining' category but no period is specified. Returns AMBIGUOUS status and requests clarification. Must NOT fabricate a 'Food' category.",
       "safety_relevant": false,
-      "human_review_focus": "Does agent fabricate categories or handle mapping limitation honestly?",
-      "notes": "KNOWN LIMITATION: keyword-based understanding does not auto-map 'food' to 'Dining'.",
+      "human_review_focus": "Does agent correctly identify food→Dining mapping and handle missing period honestly?",
+      "notes": "Tests semantic category mapping (food→Dining) and honest ambiguity handling.",
       "suite": "core"
     },
     {
