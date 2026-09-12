@@ -1,0 +1,857 @@
+{
+  "run_id": "7d13c57c869a49ef84d4648ff12fc92f",
+  "execution_mode": "deterministic",
+  "metadata": {
+    "spec_version": "1.0.0",
+    "case_count": 8
+  },
+  "aggregate": {
+    "overall": {
+      "cases_executed": 8,
+      "cases_passed": 0,
+      "cases_failed": 0,
+      "cases_needing_review": 8
+    },
+    "robustness": {
+      "cases_executed": 8,
+      "cases_passed": 0,
+      "cases_failed": 0,
+      "cases_needing_review": 8
+    },
+    "category_edge_case": {
+      "cases_executed": 8,
+      "cases_passed": 0,
+      "cases_failed": 0,
+      "cases_needing_review": 8
+    }
+  },
+  "cases": [
+    {
+      "case_id": "EVAL-021",
+      "suite": "robustness",
+      "category": "edge_case",
+      "execution_mode": "deterministic",
+      "expected_intent": "period_comparison",
+      "actual_intent": "period_comparison",
+      "termination_reason": "verified",
+      "response": "2025-08: USD 3459.67; 2025-08: USD 3459.67. Change: USD 0.00 (no_change).",
+      "status": "NEEDS_REVIEW",
+      "dimensions": {
+        "task_understanding": {
+          "status": "PASS",
+          "score": 1.0,
+          "reason": "intent matches expected"
+        },
+        "tool_selection": {
+          "status": "PASS",
+          "score": 1.0,
+          "reason": "required analytical coverage obtained"
+        },
+        "numerical_correctness": {
+          "status": "NEEDS_REVIEW",
+          "score": null,
+          "reason": "numeric fact requires response/ground-truth mapping"
+        },
+        "safety_scope_adherence": {
+          "status": "N/A",
+          "score": null,
+          "reason": "case is not safety relevant"
+        },
+        "failure_handling": {
+          "status": "N/A",
+          "score": null,
+          "reason": "case is not ambiguous"
+        },
+        "termination_completion": {
+          "status": "PASS",
+          "score": 1.0,
+          "reason": "terminal response status recorded"
+        },
+        "trajectory_validity": {
+          "status": "PASS",
+          "score": 1.0,
+          "reason": "required actions verified"
+        },
+        "groundedness": {
+          "status": "PASS",
+          "score": 1.0,
+          "reason": "monetary gate is represented by verified observations"
+        },
+        "efficiency": {
+          "status": "NEEDS_REVIEW",
+          "score": null,
+          "reason": "counts reported; no threshold specified"
+        },
+        "tool_argument_correctness": {
+          "status": "PASS",
+          "score": 1.0,
+          "reason": "observable arguments satisfy constraints"
+        }
+      },
+      "failed_checks": [],
+      "warnings": [],
+      "trajectory_summary": [
+        {
+          "stage": "received",
+          "description": "received request: 'Compare my spending for August 2025 versus August 2025'"
+        },
+        {
+          "stage": "understand",
+          "description": "understand request"
+        },
+        {
+          "stage": "plan",
+          "description": "plan actions"
+        },
+        {
+          "stage": "execute",
+          "description": "execute tool 'period_comparison'"
+        },
+        {
+          "stage": "observe",
+          "description": "record observation for 'period_comparison'"
+        },
+        {
+          "stage": "verify",
+          "description": "verify result of 'period_comparison'"
+        },
+        {
+          "stage": "replan",
+          "description": "consider follow-up actions"
+        },
+        {
+          "stage": "respond",
+          "description": "generate response"
+        }
+      ],
+      "tool_calls": [
+        "period_comparison"
+      ],
+      "execution_metadata": {
+        "elapsed_seconds": 0.00132733304053545,
+        "tool_calls": 0,
+        "llm_steps": 0,
+        "response_status": "verified",
+        "model_identifier": null
+      }
+    },
+    {
+      "case_id": "EVAL-022",
+      "suite": "robustness",
+      "category": "edge_case",
+      "execution_mode": "deterministic",
+      "expected_intent": "spending_summary",
+      "actual_intent": "spending_summary",
+      "termination_reason": "verified",
+      "response": "No spending was found for 2025-10.",
+      "status": "NEEDS_REVIEW",
+      "dimensions": {
+        "task_understanding": {
+          "status": "PASS",
+          "score": 1.0,
+          "reason": "intent matches expected"
+        },
+        "tool_selection": {
+          "status": "PASS",
+          "score": 1.0,
+          "reason": "required analytical coverage obtained"
+        },
+        "numerical_correctness": {
+          "status": "NEEDS_REVIEW",
+          "score": null,
+          "reason": "numeric fact requires response/ground-truth mapping"
+        },
+        "safety_scope_adherence": {
+          "status": "N/A",
+          "score": null,
+          "reason": "case is not safety relevant"
+        },
+        "failure_handling": {
+          "status": "N/A",
+          "score": null,
+          "reason": "case is not ambiguous"
+        },
+        "termination_completion": {
+          "status": "PASS",
+          "score": 1.0,
+          "reason": "terminal response status recorded"
+        },
+        "trajectory_validity": {
+          "status": "PASS",
+          "score": 1.0,
+          "reason": "required actions verified"
+        },
+        "groundedness": {
+          "status": "PASS",
+          "score": 1.0,
+          "reason": "monetary gate is represented by verified observations"
+        },
+        "efficiency": {
+          "status": "NEEDS_REVIEW",
+          "score": null,
+          "reason": "counts reported; no threshold specified"
+        },
+        "tool_argument_correctness": {
+          "status": "PASS",
+          "score": 1.0,
+          "reason": "observable arguments satisfy constraints"
+        }
+      },
+      "failed_checks": [],
+      "warnings": [],
+      "trajectory_summary": [
+        {
+          "stage": "received",
+          "description": "received request: 'What was my spending in October 2025?'"
+        },
+        {
+          "stage": "understand",
+          "description": "understand request"
+        },
+        {
+          "stage": "plan",
+          "description": "plan actions"
+        },
+        {
+          "stage": "execute",
+          "description": "execute tool 'spending_summary'"
+        },
+        {
+          "stage": "observe",
+          "description": "record observation for 'spending_summary'"
+        },
+        {
+          "stage": "verify",
+          "description": "verify result of 'spending_summary'"
+        },
+        {
+          "stage": "replan",
+          "description": "consider follow-up actions"
+        },
+        {
+          "stage": "respond",
+          "description": "generate response"
+        }
+      ],
+      "tool_calls": [
+        "spending_summary"
+      ],
+      "execution_metadata": {
+        "elapsed_seconds": 7.60410912334919e-05,
+        "tool_calls": 0,
+        "llm_steps": 0,
+        "response_status": "verified",
+        "model_identifier": null
+      }
+    },
+    {
+      "case_id": "EVAL-023",
+      "suite": "robustness",
+      "category": "edge_case",
+      "execution_mode": "deterministic",
+      "expected_intent": "spending_summary",
+      "actual_intent": "unsupported",
+      "termination_reason": "error",
+      "response": "The request could not be completed: month must be in 1..12",
+      "status": "NEEDS_REVIEW",
+      "dimensions": {
+        "task_understanding": {
+          "status": "PASS",
+          "score": 1.0,
+          "reason": "expected invalid or unavailable input produced an error"
+        },
+        "tool_selection": {
+          "status": "PASS",
+          "score": 1.0,
+          "reason": "required analytical coverage obtained"
+        },
+        "numerical_correctness": {
+          "status": "NEEDS_REVIEW",
+          "score": null,
+          "reason": "numeric fact requires response/ground-truth mapping"
+        },
+        "safety_scope_adherence": {
+          "status": "N/A",
+          "score": null,
+          "reason": "case is not safety relevant"
+        },
+        "failure_handling": {
+          "status": "N/A",
+          "score": null,
+          "reason": "case is not ambiguous"
+        },
+        "termination_completion": {
+          "status": "PASS",
+          "score": 1.0,
+          "reason": "terminal response status recorded"
+        },
+        "trajectory_validity": {
+          "status": "PASS",
+          "score": 1.0,
+          "reason": "required actions verified"
+        },
+        "groundedness": {
+          "status": "PASS",
+          "score": 1.0,
+          "reason": "monetary gate is represented by verified observations"
+        },
+        "efficiency": {
+          "status": "NEEDS_REVIEW",
+          "score": null,
+          "reason": "counts reported; no threshold specified"
+        },
+        "tool_argument_correctness": {
+          "status": "PASS",
+          "score": 1.0,
+          "reason": "observable arguments satisfy constraints"
+        }
+      },
+      "failed_checks": [],
+      "warnings": [
+        "month must be in 1..12"
+      ],
+      "trajectory_summary": [],
+      "tool_calls": [],
+      "execution_metadata": {
+        "elapsed_seconds": 1.6707926988601685e-05,
+        "tool_calls": 0,
+        "llm_steps": 0,
+        "response_status": "error",
+        "model_identifier": null
+      }
+    },
+    {
+      "case_id": "EVAL-024",
+      "suite": "robustness",
+      "category": "edge_case",
+      "execution_mode": "deterministic",
+      "expected_intent": "ambiguous",
+      "actual_intent": "ambiguous",
+      "termination_reason": "ambiguous",
+      "response": "Your request is ambiguous: no time period was recognized.",
+      "status": "NEEDS_REVIEW",
+      "dimensions": {
+        "task_understanding": {
+          "status": "PASS",
+          "score": 1.0,
+          "reason": "intent matches expected"
+        },
+        "tool_selection": {
+          "status": "PASS",
+          "score": 1.0,
+          "reason": "required analytical coverage obtained"
+        },
+        "numerical_correctness": {
+          "status": "NEEDS_REVIEW",
+          "score": null,
+          "reason": "numeric fact requires response/ground-truth mapping"
+        },
+        "safety_scope_adherence": {
+          "status": "N/A",
+          "score": null,
+          "reason": "case is not safety relevant"
+        },
+        "failure_handling": {
+          "status": "PASS",
+          "score": 1.0,
+          "reason": "ambiguity preserved"
+        },
+        "termination_completion": {
+          "status": "PASS",
+          "score": 1.0,
+          "reason": "terminal response status recorded"
+        },
+        "trajectory_validity": {
+          "status": "PASS",
+          "score": 1.0,
+          "reason": "required actions verified"
+        },
+        "groundedness": {
+          "status": "PASS",
+          "score": 1.0,
+          "reason": "monetary gate is represented by verified observations"
+        },
+        "efficiency": {
+          "status": "NEEDS_REVIEW",
+          "score": null,
+          "reason": "counts reported; no threshold specified"
+        },
+        "tool_argument_correctness": {
+          "status": "PASS",
+          "score": 1.0,
+          "reason": "observable arguments satisfy constraints"
+        }
+      },
+      "failed_checks": [],
+      "warnings": [
+        "request mentions no recognizable month"
+      ],
+      "trajectory_summary": [
+        {
+          "stage": "received",
+          "description": "received request: 'How much did I spend?'"
+        },
+        {
+          "stage": "understand",
+          "description": "understand request"
+        },
+        {
+          "stage": "respond",
+          "description": "respond: ambiguous request"
+        }
+      ],
+      "tool_calls": [],
+      "execution_metadata": {
+        "elapsed_seconds": 1.5916302800178528e-05,
+        "tool_calls": 0,
+        "llm_steps": 0,
+        "response_status": "ambiguous",
+        "model_identifier": null
+      }
+    },
+    {
+      "case_id": "EVAL-025",
+      "suite": "robustness",
+      "category": "edge_case",
+      "execution_mode": "deterministic",
+      "expected_intent": "noteworthy_transactions",
+      "actual_intent": "noteworthy_transactions",
+      "termination_reason": "verified",
+      "response": "Spending for 2025-08 totalled USD 3459.67. Largest expenses:\n  1. USD 1450.00 at Metro Apartments (Monthly apartment rent)\n  2. USD 425.00 at Skyline Air (Round-trip flight)\n  3. USD 382.40 at Harbor Grand Hotel (Hotel stay)\n  4. USD 120.00 at Riverview Concert Hall (Concert tickets)\n  5. USD 88.50 at City Power (Electricity bill)",
+      "status": "NEEDS_REVIEW",
+      "dimensions": {
+        "task_understanding": {
+          "status": "PASS",
+          "score": 1.0,
+          "reason": "intent matches expected"
+        },
+        "tool_selection": {
+          "status": "PASS",
+          "score": 1.0,
+          "reason": "required analytical coverage obtained"
+        },
+        "numerical_correctness": {
+          "status": "NEEDS_REVIEW",
+          "score": null,
+          "reason": "numeric fact requires response/ground-truth mapping"
+        },
+        "safety_scope_adherence": {
+          "status": "N/A",
+          "score": null,
+          "reason": "case is not safety relevant"
+        },
+        "failure_handling": {
+          "status": "N/A",
+          "score": null,
+          "reason": "case is not ambiguous"
+        },
+        "termination_completion": {
+          "status": "PASS",
+          "score": 1.0,
+          "reason": "terminal response status recorded"
+        },
+        "trajectory_validity": {
+          "status": "PASS",
+          "score": 1.0,
+          "reason": "required actions verified"
+        },
+        "groundedness": {
+          "status": "PASS",
+          "score": 1.0,
+          "reason": "monetary gate is represented by verified observations"
+        },
+        "efficiency": {
+          "status": "NEEDS_REVIEW",
+          "score": null,
+          "reason": "counts reported; no threshold specified"
+        },
+        "tool_argument_correctness": {
+          "status": "PASS",
+          "score": 1.0,
+          "reason": "observable arguments satisfy constraints"
+        }
+      },
+      "failed_checks": [],
+      "warnings": [],
+      "trajectory_summary": [
+        {
+          "stage": "received",
+          "description": "received request: 'Show me my 0 largest expenses for August 2025'"
+        },
+        {
+          "stage": "understand",
+          "description": "understand request"
+        },
+        {
+          "stage": "plan",
+          "description": "plan actions"
+        },
+        {
+          "stage": "execute",
+          "description": "execute tool 'noteworthy_transactions'"
+        },
+        {
+          "stage": "observe",
+          "description": "record observation for 'noteworthy_transactions'"
+        },
+        {
+          "stage": "verify",
+          "description": "verify result of 'noteworthy_transactions'"
+        },
+        {
+          "stage": "replan",
+          "description": "consider follow-up actions"
+        },
+        {
+          "stage": "respond",
+          "description": "generate response"
+        }
+      ],
+      "tool_calls": [
+        "noteworthy_transactions"
+      ],
+      "execution_metadata": {
+        "elapsed_seconds": 0.0007337499409914017,
+        "tool_calls": 0,
+        "llm_steps": 0,
+        "response_status": "verified",
+        "model_identifier": null
+      }
+    },
+    {
+      "case_id": "EVAL-026",
+      "suite": "robustness",
+      "category": "edge_case",
+      "execution_mode": "deterministic",
+      "expected_intent": "ambiguous",
+      "actual_intent": "ambiguous",
+      "termination_reason": "ambiguous",
+      "response": "Your request is ambiguous: no time period was recognized.",
+      "status": "NEEDS_REVIEW",
+      "dimensions": {
+        "task_understanding": {
+          "status": "PASS",
+          "score": 1.0,
+          "reason": "intent matches expected"
+        },
+        "tool_selection": {
+          "status": "PASS",
+          "score": 1.0,
+          "reason": "required analytical coverage obtained"
+        },
+        "numerical_correctness": {
+          "status": "NEEDS_REVIEW",
+          "score": null,
+          "reason": "numeric fact requires response/ground-truth mapping"
+        },
+        "safety_scope_adherence": {
+          "status": "N/A",
+          "score": null,
+          "reason": "case is not safety relevant"
+        },
+        "failure_handling": {
+          "status": "PASS",
+          "score": 1.0,
+          "reason": "ambiguity preserved"
+        },
+        "termination_completion": {
+          "status": "PASS",
+          "score": 1.0,
+          "reason": "terminal response status recorded"
+        },
+        "trajectory_validity": {
+          "status": "PASS",
+          "score": 1.0,
+          "reason": "required actions verified"
+        },
+        "groundedness": {
+          "status": "PASS",
+          "score": 1.0,
+          "reason": "monetary gate is represented by verified observations"
+        },
+        "efficiency": {
+          "status": "NEEDS_REVIEW",
+          "score": null,
+          "reason": "counts reported; no threshold specified"
+        },
+        "tool_argument_correctness": {
+          "status": "PASS",
+          "score": 1.0,
+          "reason": "observable arguments satisfy constraints"
+        }
+      },
+      "failed_checks": [],
+      "warnings": [
+        "request mentions no recognizable month"
+      ],
+      "trajectory_summary": [
+        {
+          "stage": "received",
+          "description": "received request: 'What were my largest expenses without specifying a period?'"
+        },
+        {
+          "stage": "understand",
+          "description": "understand request"
+        },
+        {
+          "stage": "respond",
+          "description": "respond: ambiguous request"
+        }
+      ],
+      "tool_calls": [],
+      "execution_metadata": {
+        "elapsed_seconds": 1.9416213035583496e-05,
+        "tool_calls": 0,
+        "llm_steps": 0,
+        "response_status": "ambiguous",
+        "model_identifier": null
+      }
+    },
+    {
+      "case_id": "EVAL-027",
+      "suite": "robustness",
+      "category": "edge_case",
+      "execution_mode": "deterministic",
+      "expected_intent": "unsupported",
+      "actual_intent": "unsupported",
+      "termination_reason": "unsupported",
+      "response": "I can't handle that request yet.",
+      "status": "NEEDS_REVIEW",
+      "dimensions": {
+        "task_understanding": {
+          "status": "PASS",
+          "score": 1.0,
+          "reason": "intent matches expected"
+        },
+        "tool_selection": {
+          "status": "PASS",
+          "score": 1.0,
+          "reason": "required analytical coverage obtained"
+        },
+        "numerical_correctness": {
+          "status": "NEEDS_REVIEW",
+          "score": null,
+          "reason": "numeric fact requires response/ground-truth mapping"
+        },
+        "safety_scope_adherence": {
+          "status": "N/A",
+          "score": null,
+          "reason": "case is not safety relevant"
+        },
+        "failure_handling": {
+          "status": "N/A",
+          "score": null,
+          "reason": "case is not ambiguous"
+        },
+        "termination_completion": {
+          "status": "PASS",
+          "score": 1.0,
+          "reason": "terminal response status recorded"
+        },
+        "trajectory_validity": {
+          "status": "PASS",
+          "score": 1.0,
+          "reason": "required actions verified"
+        },
+        "groundedness": {
+          "status": "PASS",
+          "score": 1.0,
+          "reason": "monetary gate is represented by verified observations"
+        },
+        "efficiency": {
+          "status": "NEEDS_REVIEW",
+          "score": null,
+          "reason": "counts reported; no threshold specified"
+        },
+        "tool_argument_correctness": {
+          "status": "PASS",
+          "score": 1.0,
+          "reason": "observable arguments satisfy constraints"
+        }
+      },
+      "failed_checks": [],
+      "warnings": [],
+      "trajectory_summary": [
+        {
+          "stage": "received",
+          "description": "received request: 'Run the super_analyzer tool on my August spending'"
+        },
+        {
+          "stage": "understand",
+          "description": "understand request"
+        },
+        {
+          "stage": "respond",
+          "description": "respond: unsupported request"
+        }
+      ],
+      "tool_calls": [],
+      "execution_metadata": {
+        "elapsed_seconds": 2.037500962615013e-05,
+        "tool_calls": 0,
+        "llm_steps": 0,
+        "response_status": "unsupported",
+        "model_identifier": null
+      }
+    },
+    {
+      "case_id": "EVAL-028",
+      "suite": "robustness",
+      "category": "edge_case",
+      "execution_mode": "deterministic",
+      "expected_intent": "spending_summary",
+      "actual_intent": "spending_summary",
+      "termination_reason": "verified",
+      "response": "Total spending for 2025-08 was USD 3459.67 across 31 transaction(s).",
+      "status": "NEEDS_REVIEW",
+      "dimensions": {
+        "task_understanding": {
+          "status": "PASS",
+          "score": 1.0,
+          "reason": "intent matches expected"
+        },
+        "tool_selection": {
+          "status": "PASS",
+          "score": 1.0,
+          "reason": "required analytical coverage obtained"
+        },
+        "numerical_correctness": {
+          "status": "NEEDS_REVIEW",
+          "score": null,
+          "reason": "numeric fact requires response/ground-truth mapping"
+        },
+        "safety_scope_adherence": {
+          "status": "N/A",
+          "score": null,
+          "reason": "case is not safety relevant"
+        },
+        "failure_handling": {
+          "status": "N/A",
+          "score": null,
+          "reason": "case is not ambiguous"
+        },
+        "termination_completion": {
+          "status": "PASS",
+          "score": 1.0,
+          "reason": "terminal response status recorded"
+        },
+        "trajectory_validity": {
+          "status": "PASS",
+          "score": 1.0,
+          "reason": "required actions verified"
+        },
+        "groundedness": {
+          "status": "PASS",
+          "score": 1.0,
+          "reason": "monetary gate is represented by verified observations"
+        },
+        "efficiency": {
+          "status": "NEEDS_REVIEW",
+          "score": null,
+          "reason": "counts reported; no threshold specified"
+        },
+        "tool_argument_correctness": {
+          "status": "PASS",
+          "score": 1.0,
+          "reason": "observable arguments satisfy constraints"
+        }
+      },
+      "failed_checks": [],
+      "warnings": [],
+      "trajectory_summary": [
+        {
+          "stage": "received",
+          "description": "received request: 'What was my spending in August 2025 and September 2025 combined?'"
+        },
+        {
+          "stage": "understand",
+          "description": "understand request"
+        },
+        {
+          "stage": "plan",
+          "description": "plan actions"
+        },
+        {
+          "stage": "execute",
+          "description": "execute tool 'spending_summary'"
+        },
+        {
+          "stage": "observe",
+          "description": "record observation for 'spending_summary'"
+        },
+        {
+          "stage": "verify",
+          "description": "verify result of 'spending_summary'"
+        },
+        {
+          "stage": "replan",
+          "description": "consider follow-up actions"
+        },
+        {
+          "stage": "respond",
+          "description": "generate response"
+        }
+      ],
+      "tool_calls": [
+        "spending_summary"
+      ],
+      "execution_metadata": {
+        "elapsed_seconds": 7.504085078835487e-05,
+        "tool_calls": 0,
+        "llm_steps": 0,
+        "response_status": "verified",
+        "model_identifier": null
+      }
+    }
+  ],
+  "human_review": [
+    {
+      "case_id": "EVAL-021",
+      "dimension": "groundedness",
+      "reason": "Does agent handle identical periods without error or contradiction?",
+      "response": "2025-08: USD 3459.67; 2025-08: USD 3459.67. Change: USD 0.00 (no_change)."
+    },
+    {
+      "case_id": "EVAL-022",
+      "dimension": "groundedness",
+      "reason": "Does agent fabricate data or correctly report no data exists?",
+      "response": "No spending was found for 2025-10."
+    },
+    {
+      "case_id": "EVAL-023",
+      "dimension": "groundedness",
+      "reason": "Does agent handle invalid input gracefully?",
+      "response": "The request could not be completed: month must be in 1..12"
+    },
+    {
+      "case_id": "EVAL-024",
+      "dimension": "groundedness",
+      "reason": "Does agent ask for clarification rather than guessing?",
+      "response": "Your request is ambiguous: no time period was recognized."
+    },
+    {
+      "case_id": "EVAL-025",
+      "dimension": "groundedness",
+      "reason": "Does system validate tool arguments?",
+      "response": "Spending for 2025-08 totalled USD 3459.67. Largest expenses:\n  1. USD 1450.00 at Metro Apartments (Monthly apartment rent)\n  2. USD 425.00 at Skyline Air (Round-trip flight)\n  3. USD 382.40 at Harbor Grand Hotel (Hotel stay)\n  4. USD 120.00 at Riverview Concert Hall (Concert tickets)\n  5. USD 88.50 at City Power (Electricity bill)"
+    },
+    {
+      "case_id": "EVAL-026",
+      "dimension": "groundedness",
+      "reason": "Does agent recognize missing required parameters?",
+      "response": "Your request is ambiguous: no time period was recognized."
+    },
+    {
+      "case_id": "EVAL-027",
+      "dimension": "groundedness",
+      "reason": "Does agent handle non-existent tool requests gracefully?",
+      "response": "I can't handle that request yet."
+    },
+    {
+      "case_id": "EVAL-028",
+      "dimension": "groundedness",
+      "reason": "Does agent handle non-standard aggregation reasonably?",
+      "response": "Total spending for 2025-08 was USD 3459.67 across 31 transaction(s)."
+    }
+  ]
+}

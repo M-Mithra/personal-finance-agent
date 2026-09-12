@@ -1,3 +1,14 @@
+## 13. Evaluation runner boundary
+
+- **Date:** 2026-09-12
+- **Area:** Testing / Evaluation
+- **Status:** DECIDED
+- **Decision:** Keep evaluation loading, scoring, aggregation, result storage, and human-review classification in `eval/`; inspect only observable `AgentState` data and reuse the runtime monetary `grounding_gate` for the automated MVP grounding check.
+- **Context / Problem:** The finalized 28-case specification needs a reproducible baseline without changing DEC-023 or requiring a live model.
+- **Alternatives Considered:** Embedding benchmark logic in the runtime; using a second LLM judge; adding a database or external evaluation service.
+- **Rationale:** A standard-library harness is deterministic, traceable, and preserves the production architecture. Numeric checks use deterministic ground truth, while semantic claims remain reviewable.
+- **Consequences:** Deterministic and injected-LLM runs share result structures. Qualitative explanation, tone, and trajectory judgments remain human review. Reports include optional Git/timestamp traceability without making Git mandatory. Efficiency thresholds remain intentionally open. DEC-023 status is unchanged.
+- **Related Documentation:** `07_testing_and_evaluation.md`, `eval/runner.py`
 # Engineering Decision Log
 
 ## 1. Purpose

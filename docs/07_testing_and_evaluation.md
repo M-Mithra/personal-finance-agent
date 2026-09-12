@@ -867,6 +867,45 @@ When a runner is built, each evaluation run should report:
 - Overall score (all 28 cases).
 - Category-level scores (basic, multi-step, ambiguous, safety, grounding, edge).
 
-## 34.12 Next step
+## 34.12 Evaluation runner implementation
 
-The next task is to build the evaluation runner that executes EVAL-001..028 against the agent, computes the scores above, and produces machine-readable + human-reviewable results. No runner exists yet, and no live model evaluation has been performed.
+The first runner is implemented in `eval/runner.py` and remains outside the
+production runtime. `eval/loader.py` validates all five specification artifacts,
+including IDs, suites, datasets, intents, tools, and required fields. Dataset A
+is loaded through the existing CSV, validation, and normalization pipeline; the
+runner does not duplicate transaction construction or hard-code totals.
+
+`EvaluationRunner` supports deterministic `Agent.execute` runs and an explicit
+LLM path through the existing `run_llm_loop` function with an injected
+`LLMClient`; the current architecture does not add an `Agent.run_llm()` wrapper.
+LLM mode never implicitly starts Ollama. `PYTHONPATH=src python -m eval` writes a
+new JSON result under `eval/results/` without overwriting prior results. Results
+contain only observable state: intents, terminal status, response, stages, tool
+calls, verification-related warnings, execution counts, scores, and review items.
+
+Automated checks cover intent, required tool coverage, semantic period and limit
+constraints, numeric values against `ground_truth.json`, safety boundaries,
+ambiguity preservation, terminal status, and trajectory verification. The
+groundedness check reuses the runtime's MVP `grounding_gate`: currency-anchored
+figures in the response must occur in verified analytical observations. It does
+not evaluate causal or semantic explanations. Efficiency is reported without an
+invented threshold. Review items are created only for qualitative concerns such
+as explanation grounding, safety tone, or trajectory optimality; the presence of
+`human_review_focus` alone does not create a review item.
+
+Each report records a UUID run ID, UTC timestamp, execution mode, model
+identifier when available, Git revision when available, suite, case count, and
+LLM budget configuration. Git is optional and unavailable revisions are recorded
+as null. Raw transactions and private model reasoning are excluded.
+
+The deterministic baseline is a harness/reference run, not a claim that every
+LLM-oriented case should pass `Agent.run()`. Expected empty, ambiguous,
+unsupported, invalid, and failed outcomes are reported objectively. Unexpected
+runtime exceptions are captured per case so one robustness input cannot abort the
+suite. Focused tests run with `PYTHONPATH=src python -m unittest tests.test_evaluation`.
+The deterministic baseline is a reference harness run. EVAL-008 is an observed
+production-agent period-order mismatch; it is reported and not repaired in the
+agent. EVAL-011 and the other intent differences are retained as baseline
+limitations rather than tuned away. No live Qwen or Ollama evaluation has been
+run, and Dataset B remains deferred.
+DEC-023 remains PROPOSED / PROVISIONAL / EXPERIMENTAL.
