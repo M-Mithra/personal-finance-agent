@@ -35,7 +35,7 @@ from personal_finance_agent.runtime.llm_loop import (
     summarise_observation_for_llm,
     validate_llm_tool_call,
 )
-from personal_finance_agent.runtime.state import AgentState, Observation
+from personal_finance_agent.runtime.state import AgentState, Observation, ResponseStatus
 
 from tests.support import standard_transactions
 
@@ -64,6 +64,7 @@ class TestSingleToolCall(unittest.TestCase):
         self.assertEqual(
             state.termination_reason, LLMTerminationReason.RESPONSE_COMPLETE.value
         )
+        self.assertEqual(state.response_status, ResponseStatus.VERIFIED)
         self.assertIn("USD 400.00", state.response)
         self.assertEqual(fake.remaining, 0)
         self.assertIn("spending_summary", [o.action_name for o in state.observations])
@@ -118,6 +119,7 @@ class TestUnknownTool(unittest.TestCase):
         state = run_llm_loop("How much did I spend in August?", _tx(), fake)
         self.assertEqual(
             state.termination_reason, LLMTerminationReason.RESPONSE_COMPLETE.value)
+        self.assertEqual(state.response_status, ResponseStatus.VERIFIED)
         self.assertIn("USD 400.00", state.response)
         self.assertTrue(any("no_such_tool" in e for e in state.errors))
 
@@ -128,6 +130,7 @@ class TestUnknownTool(unittest.TestCase):
         self.assertEqual(
             state.termination_reason,
             LLMTerminationReason.MAX_RETRIES_INVALID.value)
+        self.assertEqual(state.response_status, ResponseStatus.ERROR)
         self.assertIn("trouble", state.response)
 
 
@@ -143,6 +146,7 @@ class TestInvalidArgs(unittest.TestCase):
         state = run_llm_loop("How much did I spend in August?", _tx(), fake)
         self.assertEqual(
             state.termination_reason, LLMTerminationReason.RESPONSE_COMPLETE.value)
+        self.assertEqual(state.response_status, ResponseStatus.VERIFIED)
 
     def test_unexpected_arg_rejected(self) -> None:
         v = validate_llm_tool_call(
@@ -171,6 +175,7 @@ class TestInvalidPeriodFormat(unittest.TestCase):
         state = run_llm_loop("How much did I spend in August?", _tx(), fake)
         self.assertEqual(
             state.termination_reason, LLMTerminationReason.RESPONSE_COMPLETE.value)
+        self.assertEqual(state.response_status, ResponseStatus.VERIFIED)
 
 
 class TestReversedPeriods(unittest.TestCase):
@@ -197,6 +202,7 @@ class TestReversedPeriods(unittest.TestCase):
                              _tx(), fake)
         self.assertEqual(
             state.termination_reason, LLMTerminationReason.RESPONSE_COMPLETE.value)
+        self.assertEqual(state.response_status, ResponseStatus.VERIFIED)
         obs = [o for o in state.observations if o.success]
         self.assertEqual(len(obs), 1)
         self.assertEqual(obs[0].action_name, "period_comparison")
@@ -215,6 +221,7 @@ class TestMalformedResponse(unittest.TestCase):
         state = run_llm_loop("How much did I spend in August?", _tx(), fake)
         self.assertEqual(
             state.termination_reason, LLMTerminationReason.RESPONSE_COMPLETE.value)
+        self.assertEqual(state.response_status, ResponseStatus.VERIFIED)
         self.assertIn("USD 400.00", state.response)
 
     def test_malformed_exhausts_retry(self) -> None:
@@ -223,6 +230,7 @@ class TestMalformedResponse(unittest.TestCase):
         self.assertEqual(
             state.termination_reason,
             LLMTerminationReason.MAX_RETRIES_INVALID.value)
+        self.assertEqual(state.response_status, ResponseStatus.ERROR)
 
 
 class TestEmptyFinalResponse(unittest.TestCase):
@@ -253,6 +261,7 @@ class TestGroundingRejectsUnsupportedFigure(unittest.TestCase):
         state = run_llm_loop("How much did I spend in August?", _tx(), fake)
         self.assertEqual(
             state.termination_reason, LLMTerminationReason.GROUNDING_FALLBACK.value)
+        self.assertEqual(state.response_status, ResponseStatus.INCOMPLETE)
         self.assertNotIn("999.00", state.response)
         self.assertIn("USD 400.00", state.response)
 
@@ -327,6 +336,7 @@ class TestModelErrors(unittest.TestCase):
         state = run_llm_loop("How much did I spend in August?", _tx(), fake)
         self.assertEqual(
             state.termination_reason, LLMTerminationReason.MODEL_ERROR.value)
+        self.assertEqual(state.response_status, ResponseStatus.ERROR)
         self.assertTrue(state.response)
 
     def test_model_unavailable_terminates_safely(self) -> None:
@@ -334,12 +344,14 @@ class TestModelErrors(unittest.TestCase):
         state = run_llm_loop("How much did I spend in August?", _tx(), fake)
         self.assertEqual(
             state.termination_reason, LLMTerminationReason.MODEL_ERROR.value)
+        self.assertEqual(state.response_status, ResponseStatus.ERROR)
 
     def test_exhausted_responses_terminates_safely(self) -> None:
         fake = FakeLLMClient([])
         state = run_llm_loop("How much did I spend in August?", _tx(), fake)
         self.assertEqual(
             state.termination_reason, LLMTerminationReason.MODEL_ERROR.value)
+        self.assertEqual(state.response_status, ResponseStatus.ERROR)
         self.assertTrue(state.response)
 
 
@@ -353,6 +365,7 @@ class TestBudgets(unittest.TestCase):
                              cfg)
         self.assertEqual(
             state.termination_reason, LLMTerminationReason.BUDGET_STEPS.value)
+        self.assertEqual(state.response_status, ResponseStatus.INCOMPLETE)
 
     def test_tool_call_budget(self) -> None:
         fake = FakeLLMClient(
@@ -366,6 +379,7 @@ class TestBudgets(unittest.TestCase):
             (LLMTerminationReason.BUDGET_TOOL_CALLS.value,
              LLMTerminationReason.BUDGET_STEPS.value,
              LLMTerminationReason.MAX_CONSECUTIVE_REPEATS.value))
+        self.assertEqual(state.response_status, ResponseStatus.INCOMPLETE)
         self.assertLessEqual(state.tool_calls_used, 2)
 
 
@@ -380,6 +394,7 @@ class TestRepeatedToolCall(unittest.TestCase):
         self.assertEqual(
             state.termination_reason,
             LLMTerminationReason.MAX_CONSECUTIVE_REPEATS.value)
+        self.assertEqual(state.response_status, ResponseStatus.INCOMPLETE)
         self.assertEqual(state.tool_calls_used, 2)
 
     def test_distinct_args_do_not_trigger_repeat_bound(self) -> None:
@@ -396,6 +411,7 @@ class TestRepeatedToolCall(unittest.TestCase):
                              cfg)
         self.assertEqual(
             state.termination_reason, LLMTerminationReason.RESPONSE_COMPLETE.value)
+        self.assertEqual(state.response_status, ResponseStatus.VERIFIED)
 
 class TestGroundedFinalResponse(unittest.TestCase):
     def test_grounded_final_passes_through(self) -> None:
@@ -408,6 +424,7 @@ class TestGroundedFinalResponse(unittest.TestCase):
         state = run_llm_loop("How much did I spend in August?", _tx(), fake)
         self.assertEqual(
             state.termination_reason, LLMTerminationReason.RESPONSE_COMPLETE.value)
+        self.assertEqual(state.response_status, ResponseStatus.VERIFIED)
         self.assertEqual(state.response,
                          "Total spending in August was USD 400.00.")
 
@@ -421,6 +438,7 @@ class TestGroundedFinalResponse(unittest.TestCase):
         state = run_llm_loop("How much did I spend in August?", _tx(), fake)
         self.assertEqual(
             state.termination_reason, LLMTerminationReason.GROUNDING_FALLBACK.value)
+        self.assertEqual(state.response_status, ResponseStatus.INCOMPLETE)
         self.assertNotIn("1234.56", state.response)
 
     def test_correct_number_wrong_explanation_may_pass(self) -> None:
@@ -433,6 +451,25 @@ class TestGroundedFinalResponse(unittest.TestCase):
         state = run_llm_loop("How much did I spend in August?", _tx(), fake)
         self.assertEqual(
             state.termination_reason, LLMTerminationReason.RESPONSE_COMPLETE.value)
+        self.assertEqual(state.response_status, ResponseStatus.VERIFIED)
+
+
+class TestUnsupportedAndAmbiguous(unittest.TestCase):
+    def test_unsupported_request_terminates_with_status(self) -> None:
+        fake = FakeLLMClient([_final("I can't help with that.")])
+        state = run_llm_loop(
+            "Should I invest in Bitcoin?", _tx(), fake)
+        self.assertEqual(
+            state.termination_reason, LLMTerminationReason.UNSUPPORTED.value)
+        self.assertEqual(state.response_status, ResponseStatus.UNSUPPORTED)
+
+    def test_ambiguous_request_terminates_with_status(self) -> None:
+        fake = FakeLLMClient([_final("Could you clarify?")])
+        state = run_llm_loop(
+            "How much did I spend recently?", _tx(), fake)
+        self.assertEqual(
+            state.termination_reason, LLMTerminationReason.AMBIGUOUS.value)
+        self.assertEqual(state.response_status, ResponseStatus.AMBIGUOUS)
 
 
 class TestProviderNeutrality(unittest.TestCase):

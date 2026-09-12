@@ -909,3 +909,30 @@ agent. EVAL-011 and the other intent differences are retained as baseline
 limitations rather than tuned away. No live Qwen or Ollama evaluation has been
 run, and Dataset B remains deferred.
 DEC-023 remains PROPOSED / PROVISIONAL / EXPERIMENTAL.
+
+### 34.12.1 CLI arguments for LLM mode
+
+The evaluation CLI (`eval/__main__.py`) accepts the following arguments for LLM evaluation:
+
+| Argument | Default | Description |
+|----------|---------|-------------|
+| `--mode` | `deterministic` | Execution mode: `deterministic` (default) or `llm` |
+| `--model` | `qwen3:1.7b` | Ollama model identifier (used when `--mode=llm`) |
+| `--base-url` | `http://localhost:11434` | Ollama server base URL (used when `--mode=llm`) |
+| `--timeout` | `120.0` | Per-request timeout in seconds (used when `--mode=llm`) |
+
+When `--mode=deterministic` (the default), the runner uses the deterministic `Agent.execute` path without any LLM client. When `--mode=llm`, the CLI constructs an `OllamaLLMClient` with the specified model, base URL, and timeout, injects it into `EvaluationRunner` along with an `LLMLoopConfig` (using defaults: `max_model_steps=6`, `max_tool_calls=4`, `max_consecutive_repeats=2`, `retry_invalid=1`), and executes cases through `run_llm_loop`.
+
+Example usage:
+```bash
+# Deterministic baseline (default)
+uv run python -m eval --mode deterministic --output-dir eval/results
+
+# LLM evaluation against local Ollama with Qwen3 1.7B
+uv run python -m eval --mode llm --output-dir eval/results
+
+# LLM evaluation with custom model and URL
+uv run python -m eval --mode llm --model qwen3:4b --base-url http://localhost:11434 --timeout 180
+```
+
+The model identifier (`ollama:qwen3:1.7b` by default) is recorded in the evaluation report metadata under `model_identifier`. The LLM loop configuration is recorded under `llm_config`.

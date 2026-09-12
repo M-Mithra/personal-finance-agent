@@ -1073,6 +1073,7 @@ def run_llm_loop(
         # Budget checks.
         if state.llm_steps_used >= config.max_model_steps:
             state.termination_reason = LLMTerminationReason.BUDGET_STEPS.value
+            state.response_status = ResponseStatus.INCOMPLETE
             state.record(
                 TrajectoryStage.ERROR,
                 f"model step budget exhausted ({config.max_model_steps})",
@@ -1082,6 +1083,7 @@ def run_llm_loop(
 
         if state.tool_calls_used >= config.max_tool_calls:
             state.termination_reason = LLMTerminationReason.BUDGET_TOOL_CALLS.value
+            state.response_status = ResponseStatus.INCOMPLETE
             state.record(
                 TrajectoryStage.ERROR,
                 f"tool call budget exhausted ({config.max_tool_calls})",
@@ -1156,6 +1158,7 @@ def run_llm_loop(
                 state.errors.append(f"invalid model output: {exc}")
                 if consecutive_invalid > config.retry_invalid:
                     state.termination_reason = LLMTerminationReason.MAX_RETRIES_INVALID.value
+                    state.response_status = ResponseStatus.ERROR
                     state.response = (
                         "I'm having trouble processing your request right now. "
                         "Please try again or rephrase your question."
@@ -1182,6 +1185,7 @@ def run_llm_loop(
                     state.termination_reason = (
                         LLMTerminationReason.MAX_RETRIES_INVALID.value
                     )
+                    state.response_status = ResponseStatus.ERROR
                     state.record(
                         TrajectoryStage.ERROR,
                         f"model sequence exhausted during invalid retry: {exc}",
@@ -1192,6 +1196,7 @@ def run_llm_loop(
                     )
                     return state
                 state.termination_reason = LLMTerminationReason.MODEL_ERROR.value
+                state.response_status = ResponseStatus.ERROR
                 state.record(
                     TrajectoryStage.ERROR,
                     f"model error: {type(exc).__name__}: {exc}",
@@ -1223,6 +1228,7 @@ def run_llm_loop(
 
                 if consecutive_invalid > config.retry_invalid:
                     state.termination_reason = LLMTerminationReason.MAX_RETRIES_INVALID.value
+                    state.response_status = ResponseStatus.ERROR
                     state.response = (
                         "I'm having trouble processing your request right now. "
                         "Please try again or rephrase your question."
@@ -1272,6 +1278,7 @@ def run_llm_loop(
                 state.errors.append(last_invalid_reason)
                 if consecutive_invalid > config.retry_invalid:
                     state.termination_reason = LLMTerminationReason.MAX_RETRIES_INVALID.value
+                    state.response_status = ResponseStatus.ERROR
                     state.response = (
                         "I'm having trouble processing your request right now. "
                         "Please try again or rephrase your question."
@@ -1295,6 +1302,7 @@ def run_llm_loop(
                 > config.max_consecutive_repeats
             ):
                 state.termination_reason = LLMTerminationReason.MAX_CONSECUTIVE_REPEATS.value
+                state.response_status = ResponseStatus.INCOMPLETE
                 state.record(
                     TrajectoryStage.ERROR,
                     f"repeated tool call '{tool_name}' {repeated_calls[repeat_key]} times",
@@ -1403,6 +1411,7 @@ def run_llm_loop(
             # loop terminates instead of executing.
             if state.tool_calls_used >= config.max_tool_calls:
                 state.termination_reason = LLMTerminationReason.BUDGET_TOOL_CALLS.value
+                state.response_status = ResponseStatus.INCOMPLETE
                 state.record(
                     TrajectoryStage.ERROR,
                     f"tool call budget exhausted ({config.max_tool_calls})",
@@ -1411,6 +1420,7 @@ def run_llm_loop(
                 return state
             if state.llm_steps_used >= config.max_model_steps:
                 state.termination_reason = LLMTerminationReason.BUDGET_STEPS.value
+                state.response_status = ResponseStatus.INCOMPLETE
                 state.record(
                     TrajectoryStage.ERROR,
                     f"model step budget exhausted ({config.max_model_steps})",
@@ -1500,6 +1510,7 @@ def run_llm_loop(
                 state.errors.append(last_invalid_reason)
                 if consecutive_invalid > config.retry_invalid:
                     state.termination_reason = LLMTerminationReason.MAX_RETRIES_INVALID.value
+                    state.response_status = ResponseStatus.ERROR
                     state.response = (
                         "I'm having trouble processing your request right now. "
                         "Please try again or rephrase your question."
@@ -1512,6 +1523,7 @@ def run_llm_loop(
             gate_result = grounding_gate(draft, state)
             if not gate_result.passed:
                 state.termination_reason = LLMTerminationReason.GROUNDING_FALLBACK.value
+                state.response_status = ResponseStatus.INCOMPLETE
                 state.record(
                     TrajectoryStage.ERROR,
                     f"grounding gate failed: {gate_result.note}",
@@ -1536,6 +1548,7 @@ def run_llm_loop(
             last_invalid_reason = f"unexpected response type: {response.response_type}"
             if consecutive_invalid > config.retry_invalid:
                 state.termination_reason = LLMTerminationReason.MAX_RETRIES_INVALID.value
+                state.response_status = ResponseStatus.ERROR
                 state.response = (
                     "I'm having trouble processing your request right now. "
                     "Please try again or rephrase your question."
