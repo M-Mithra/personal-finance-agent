@@ -8,3 +8,7 @@ wheels/
 
 # Virtual environments
 .venv
+
+# Local/tool-generated files
+.kilo/
+eval/results/
